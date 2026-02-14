@@ -434,7 +434,11 @@ Permissions are defined at the role level:
 ### Accessing Features
 
 - **Dashboard**: Available to all authenticated users
-- **Commande Rapide**: Requires `can_add_commandes`
+  - Shows pending orders count based on user role (all for admin, service-specific for others)
+- **Nouvelle Commande**: Requires `can_add_commandes`
+- **Suivi des Commandes**: Requires `can_change_commandes` or `can_view_commandes`
+  - ADMIN/PHARMACIEN: See all orders from all services, can change status
+  - MEDECIN/RESPONSABLE/TECHNICIEN: See only their service's orders, cannot change status
 - **Réception Stock**: Requires `can_add_lots`
 - **Journaux**: Available to all authenticated users
 - **Stock**: Requires `can_view_lots` or `can_view_produits`
@@ -442,8 +446,9 @@ Permissions are defined at the role level:
 ### User Service Assignment
 
 Users can be assigned to a Service in their profile. This:
-- Pre-fills the service in Commande Rapide
+- Pre-fills the service in Nouvelle Commande
 - Links orders to specific hospital departments
+- Users without admin permissions only see their service's orders in Suivi des Commandes
 
 ## Frontend Features
 
@@ -541,12 +546,13 @@ A comprehensive stock management page accessible at `/stock` that provides:
   - Products in Alert (at or below alert threshold)
   - Products Out of Stock (rupture)
   - Available Products (OK)
-- Filter buttons to view by stock status
-- Real-time search by product name or code
+- Real-time search by product name, code, or DCI
+- Pagination with 20 items per page
 - Detailed table with columns:
   - National Code / Internal Code
   - Product Name / Dosage
   - Pharmaceutical Form
+  - DCI (Generic Name)
   - Current Stock
   - Alert Threshold
   - Security Threshold
@@ -557,6 +563,51 @@ A comprehensive stock management page accessible at `/stock` that provides:
 - 🔴 **Rupture** (Red): Stock = 0
 - 🟠 **Alerte** (Orange): Stock ≤ Alert threshold
 - 🟢 **OK** (Green): Stock > Alert threshold
+
+**Implementation:**
+- Uses TanStack Query for data fetching
+- Custom hook `useStock` for API calls
+- Backend endpoint `/api/stock/` for aggregated data
+
+**Access:** Users with `can_view_lots` or `can_view_produits` permissions
+
+## Page Naming
+
+### Sidebar Menu
+
+| Old Name | New Name | Description |
+|----------|----------|-------------|
+| Dashboard | Dashboard | Main KPIs page |
+| Commande Rapide | **Nouvelle Commande** | Create new orders |
+| Commandes | **Suivi des Commandes** | Manage order statuses |
+| - | Stock | View aggregated stock |
+| - | Réception Stock | Receive new stock |
+
+## User Interface
+
+### User Menu
+
+The user dropdown menu (top right) displays:
+- User's full name
+- Function/Role (e.g., PHARMACIEN)
+- Service (e.g., Pharmacie) - if assigned
+- Language switcher (Français / English)
+- Logout button
+
+### Permissions by Role
+
+| Role | View All Orders | Manage Orders | View Own Service Orders |
+|------|-----------------|--------------|------------------------|
+| ADMIN | ✓ | ✓ | ✓ |
+| PHARMACIEN | ✓ | ✓ | ✓ |
+| RESPONSABLE | ✗ | ✗ | ✓ (own service) |
+| MEDECIN | ✗ | ✗ | ✓ (own service) |
+| TECHNICIEN | ✗ | ✗ | ✓ (own service) |
+
+### Dashboard
+
+- **ADMIN/PHARMACIEN**: See total pending orders from all services
+- **Other users**: See only their service's pending orders
 
 **Access:** Users with `can_view_lots` or `can_view_produits` permissions
 
