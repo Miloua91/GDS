@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { useState, useEffect } from 'react'
 
-type Permission =
+export type Permission =
   | 'can_view_produits'
   | 'can_add_produits'
   | 'can_change_produits'
@@ -55,7 +55,9 @@ export const getPermissions = (): Record<string, boolean> => {
 }
 
 export const usePermissions = () => {
-  const [permissions, setPermissions] = useState<Record<string, boolean>>(() => getPermissions())
+  const [permissions, setPermissions] = useState<Record<string, boolean>>(() =>
+    getPermissions(),
+  )
 
   useEffect(() => {
     const handleUpdate = () => {
@@ -64,7 +66,7 @@ export const usePermissions = () => {
 
     window.addEventListener('permissions-updated', handleUpdate)
     window.addEventListener('storage', handleUpdate)
-    
+
     return () => {
       window.removeEventListener('permissions-updated', handleUpdate)
       window.removeEventListener('storage', handleUpdate)

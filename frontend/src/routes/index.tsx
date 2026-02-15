@@ -17,10 +17,6 @@ import {
   Users,
   UserCog,
   Shield,
-  Zap,
-  LayoutDashboard,
-  BookOpen,
-  Warehouse,
 } from 'lucide-react'
 
 import { Dashboard } from '@/features/dashboard/components'

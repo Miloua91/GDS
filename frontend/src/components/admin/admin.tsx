@@ -5,16 +5,16 @@ import {
   type CoreAdminContextProps,
   type CoreAdminProps,
   localStorageStore,
-} from "ra-core";
-import { i18nProvider as defaultI18nProvider } from "@/lib/i18nProvider";
-import { Layout } from "@/components/admin/layout";
-import { LoginPage } from "@/components/admin/login-page";
-import { Ready } from "@/components/admin/ready";
-import { ThemeProvider } from "@/components/admin/theme-provider";
-import { AuthCallback } from "@/components/admin/authentication";
-import { useEffect } from "react";
+} from 'ra-core'
+import { i18nProvider as defaultI18nProvider } from '@/lib/i18nProvider'
+import { Layout } from '@/components/admin/layout'
+import { LoginPage } from '@/components/admin/login-page'
+import { Ready } from '@/components/admin/ready'
+import { ThemeProvider } from '@/components/admin/theme-provider'
+import { AuthCallback } from '@/components/admin/authentication'
+import { useEffect } from 'react'
 
-const defaultStore = localStorageStore();
+const defaultStore = localStorageStore()
 
 /**
  * Context provider for the Admin component.
@@ -26,7 +26,7 @@ const defaultStore = localStorageStore();
  */
 const AdminContext = (props: CoreAdminContextProps) => (
   <CoreAdminContext {...props} />
-);
+)
 
 /**
  * UI component for the Admin application.
@@ -37,21 +37,21 @@ const AdminContext = (props: CoreAdminContextProps) => (
  * @internal
  */
 const AdminUI = (props: CoreAdminUIProps) => {
-  const { disableTelemetry = false, ...rest } = props;
+  const { disableTelemetry = false, ...rest } = props
 
   useEffect(() => {
     if (
       disableTelemetry ||
-      process.env.NODE_ENV !== "production" ||
-      typeof window === "undefined" ||
-      typeof window.location === "undefined" ||
-      typeof Image === "undefined"
+      process.env.NODE_ENV !== 'production' ||
+      typeof window === 'undefined' ||
+      typeof window.location === 'undefined' ||
+      typeof Image === 'undefined'
     ) {
-      return;
+      return
     }
-    const img = new Image();
-    img.src = `https://shadcn-admin-kit-telemetry.marmelab.com/shadcn-admin-kit-telemetry?domain=${window.location.hostname}`;
-  }, [disableTelemetry]);
+    const img = new Image()
+    img.src = `https://shadcn-admin-kit-telemetry.marmelab.com/shadcn-admin-kit-telemetry?domain=${window.location.hostname}`
+  }, [disableTelemetry])
 
   return (
     <ThemeProvider>
@@ -64,8 +64,8 @@ const AdminUI = (props: CoreAdminUIProps) => {
         {...rest}
       />
     </ThemeProvider>
-  );
-};
+  )
+}
 
 /**
  * Root component of a shadcn-admin-kit application.
@@ -119,8 +119,8 @@ export const Admin = (props: CoreAdminProps) => {
     ready = Ready,
     requireAuth,
     store = defaultStore,
-    title = "Shadcn Admin",
-  } = props;
+    title = 'Pharma',
+  } = props
   return (
     <AdminContext
       authProvider={authProvider}
@@ -148,5 +148,5 @@ export const Admin = (props: CoreAdminProps) => {
         {children}
       </AdminUI>
     </AdminContext>
-  );
-};
+  )
+}
