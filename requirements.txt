@@ -1,0 +1,10 @@
+Django
+djangorestframework
+djangorestframework-simplejwt
+django-corsheaders
+gunicorn
+waitress
+psycopg2-binary
+python-dotenv
+dj-database-url
+whitenoise

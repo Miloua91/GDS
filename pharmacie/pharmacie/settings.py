@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from datetime import timedelta
 
@@ -21,12 +22,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0gk9n5=xuc8q9g&m5mkbthuis^bz!2+de&_()))0!7xi+dte95'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-0gk9n5=xuc8q9g&m5mkbthuis^bz!2+de&_()))0!7xi+dte95')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', '*').split(',')
 
 AUTH_USER_MODEL = 'core.Utilisateur'
 
@@ -83,6 +84,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -92,7 +94,7 @@ MIDDLEWARE = [
     'django.middleware.gzip.GZipMiddleware',
 ]
 
-ROOT_URLCONF = 'pharmacie.urls'
+ROOT_URLCONF = 'pharmacie.pharmacie.urls'
 
 TEMPLATES = [
     {
@@ -109,7 +111,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'pharmacie.wsgi.application'
+WSGI_APPLICATION = 'pharmacie.pharmacie.wsgi.application'
 
 
 # Database
@@ -121,6 +123,11 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# Support for PostgreSQL (Koyeb)
+if os.environ.get('DATABASE_URL'):
+    import dj_database_url
+    DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
 
 
 # Password validation
@@ -157,4 +164,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(str(BASE_DIR), 'staticfiles')
+
+# WhiteNoise storage for production
+STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
