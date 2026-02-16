@@ -112,7 +112,7 @@ graph LR
 | **Réceptionner Stock** | Admin, Pharmacien, Technicien | Enregistrer une nouvelle livraison de médicaments    |
 | **Créer Lot**          | Admin, Pharmacien, Technicien | Créer un lot avec numéro, date péremption, quantité  |
 | **Créer Commande**     | Médecin, Responsable          | Soumettre une demande de médicaments pour un service |
-| **Valider Commande**   | Pharmacien                    | Approuver une demande de médicament                  |
+| **Valider Commande**   | Pharmacien                    | rouver une demande de médicament                  |
 | **Livrer Commande**    | Pharmacien                    | Délivrer les médicaments et déduire du stock         |
 | **Voir Dashboard**     | Tous                          | Consulter les KPIs et indicateurs                    |
 | **Gérer Utilisateurs** | Administrateur                | Créer, modifier, supprimer des utilisateurs          |
@@ -126,7 +126,7 @@ graph LR
 erDiagram
     UTILISATEUR ||--o{ COMMANDE : passe
     UTILISATEUR }o--|| ROLE : a
-    UTILISATEUR }o--|| SERVICE : appartient
+    UTILISATEUR }o--|| SERVICE : artient
     UTILISATEUR ||--o{ JOURNAL : effectue
 
     SERVICE ||--o{ COMMANDE : passe
@@ -276,7 +276,7 @@ JOURNAL(id, categorie, action, description, utilisateur_id, entity_type, entity_
 ```mermaid
 graph TB
     subgraph Client
-        APP[APPLICATION]
+        APP[Application]
     end
 
     subgraph Frontend
