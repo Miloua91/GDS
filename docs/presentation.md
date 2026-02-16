@@ -276,7 +276,7 @@ JOURNAL(id, categorie, action, description, utilisateur_id, entity_type, entity_
 ```mermaid
 graph TB
     subgraph Client
-        Browser[Navigateur Web]
+        APP[APPLICATION]
     end
 
     subgraph Frontend
@@ -297,7 +297,7 @@ graph TB
         SQLite[(SQLite 3)]
     end
 
-    Browser --> UI
+    APP --> UI
     UI --> Router
     Router --> Query
     Query --> API
