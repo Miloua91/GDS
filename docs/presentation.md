@@ -640,3 +640,52 @@ Le projet contient les captures d'écran suivantes dans le dossier `docs/`:
 - Réception de stock
 - Commandes en attente
 - Journaux d'audit
+### 1. Interface d'Authentification
+![Interface d'Authentification](./Screenshot%202026-02-15%20162431.png "Interface d'Authentification")
+* **Légende :** Portail de Connexion Sécurisé
+* **Description :** Point d'entrée unique du système utilisant une authentification par **JWT (JSON Web Token)**. Cette interface permet de filtrer les accès selon les rôles définis (Administrateur, Pharmacien, Médecin, etc.) pour garantir la sécurité des données sensibles.
+
+### 2. Tableau de Bord (Dashboard)
+![Tableau de Bord](./Screenshot%202026-02-15%20162638.png "Tableau de Bord")
+* **Légende :** Pilotage et Indicateurs de Performance (KPIs)
+* **Description :** Vue d'ensemble affichant les données critiques : valeur totale du stock, nombre de produits en rupture, et alertes de péremption à 30 jours. Le système utilise des widgets dynamiques pour une aide à la décision immédiate.
+
+### 3. Création de Commande Service
+![Création de Commande Service](./Screenshot%202026-02-15%20162817.png "Création de Commande Service")
+* **Légende :** Interface de Saisie de Commande
+* **Description :** Interface intuitive permettant aux médecins ou responsables de service de rechercher des produits par DCI et de les ajouter à un panier virtuel. Un résumé à droite permet de valider les quantités avant la soumission au pharmacien.
+
+### 4. État du Stock et Alertes
+![État du Stock](./Screenshot%202026-02-15%20162719.png "État du Stock")
+* **Légende :** Monitoring de l'Inventaire
+* **Description :** Vue synthétique des niveaux de stock par produit. Le système utilise des badges de couleur (ex: "Alerte" en orange) pour signaler visuellement quand un produit atteint son seuil critique de sécurité.
+
+### 5. Catalogue des Produits
+![Catalogue des Produits](./Screenshot%202026-02-15%20162740.png "Catalogue des Produits")
+* **Légende :** Référentiel National des Médicaments
+* **Description :** Base de données centralisée listant les caractéristiques techniques : Code National, DCI, forme pharmaceutique (Gélule, Comprimé, Poudre) et catégorie de surveillance (Normal vs Psychotrope).
+
+### 6. Traçabilité par Lot
+![Traçabilité par Lot](./Screenshot%202026-02-15%20162750.png "Traçabilité par Lot")
+* **Légende :** Suivi de la Traçabilité et Péremptions
+* **Description :** Détail indispensable pour la pharmacovigilance. Chaque ligne représente un lot spécifique avec son numéro unique, ses dates de fabrication/péremption, et la distinction entre quantité actuelle et quantité réservée.
+
+### 7. Suivi du Flux de Distribution
+![Suivi du Flux de Distribution](./Screenshot%202026-02-15%20163559.png "Suivi du Flux de Distribution")
+* **Légende :** Gestion du Cycle de Vie des Commandes
+* **Description :** Interface permettant de filtrer les demandes par statut (En attente, Validée, Livrée). C'est ici que le pharmacien approuve les demandes avant la déduction automatique du stock.
+
+### 8. Configuration des Services
+![Configuration des Services](./Screenshot%202026-02-15%20162846.png "Configuration des Services")
+* **Légende :** Cartographie des Unités de Soins
+* **Description :** Liste des services hospitaliers (Urgences, Réanimation, etc.) rattachés à la pharmacie. Chaque service est paramétré avec sa spécialité et son nombre de lits pour une gestion analytique.
+
+### 9. Réception de Stock (Entrées)
+![Réception de Stock](./Screenshot%202026-02-15%20163708.png "Réception de Stock")
+* **Légende :** Module d'Approvisionnement et Entrée de Stock
+* **Description :** Interface dédiée à l'enregistrement des nouveaux arrivages. Elle permet de saisir le fournisseur, le numéro de lot et les dates de péremption, assurant que chaque produit entrant est immédiatement traçable dans le système.
+
+### 10. Journal d'Audit (Logs)
+![Journal d'Audit](./Screenshot%202026-02-15%20163738.png "Journal d'Audit")
+* **Légende :** Historique des Actions et Sécurité
+* **Description :** Le journal d'audit consigne chaque opération effectuée sur la plateforme (qui, quoi, quand). C'est un outil de conformité crucial pour la gestion des stupéfiants, garantissant qu'aucune modification de stock ou validation de commande ne reste anonyme.
