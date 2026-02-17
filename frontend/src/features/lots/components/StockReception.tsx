@@ -1,11 +1,28 @@
-import { useState, useEffect, useCallback } from "react"
-import { useTranslate } from "ra-core"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { Search, Package, Plus, Minus, X, Loader2, CheckCircle, Upload, FileText } from "lucide-react"
-import { API_URL } from "@/lib/config"
+import { useState, useEffect, useCallback } from 'react'
+import { useTranslate } from 'ra-core'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+import {
+  Search,
+  Package,
+  Plus,
+  Minus,
+  X,
+  Loader2,
+  CheckCircle,
+  Upload,
+  FileText,
+} from 'lucide-react'
+import { API_URL } from '@/lib/config'
 
 interface Produit {
   id: number
@@ -49,10 +66,12 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 
 export const StockReception = () => {
   const translate = useTranslate()
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState('')
   const [produits, setProduits] = useState<Produit[]>([])
   const [fournisseurs, setFournisseurs] = useState<Fournisseur[]>([])
-  const [selectedFournisseur, setSelectedFournisseur] = useState<number | null>(null)
+  const [selectedFournisseur, setSelectedFournisseur] = useState<number | null>(
+    null,
+  )
   const [lots, setLots] = useState<LotLine[]>([])
   const [loading, setLoading] = useState(false)
   const [submitting, setSubmitting] = useState(false)
@@ -61,14 +80,14 @@ export const StockReception = () => {
 
   useEffect(() => {
     fetchWithAuth(`${API_URL}fournisseurs/`)
-      .then(data => setFournisseurs(data.results || []))
+      .then((data) => setFournisseurs(data.results || []))
       .catch(console.error)
   }, [])
 
   const searchProduits = useCallback(async (query: string) => {
     setLoading(true)
     try {
-      const url = query 
+      const url = query
         ? `${API_URL}produits-with-stock/?search=${encodeURIComponent(query)}`
         : `${API_URL}produits-with-stock/`
       const data = await fetchWithAuth(url)
@@ -91,7 +110,7 @@ export const StockReception = () => {
     const today = new Date().toISOString().split('T')[0]
     const expDate = new Date()
     expDate.setFullYear(expDate.getFullYear() + 1)
-    
+
     const newLot: LotLine = {
       produit_id: produit.id,
       denomination: produit.denomination,
@@ -99,18 +118,20 @@ export const StockReception = () => {
       quantite: 1,
       date_peremption: expDate.toISOString().split('T')[0],
       date_fabrication: today,
-      prix_unitaire: ''
+      prix_unitaire: '',
     }
     setLots([...lots, newLot])
   }
 
   const updateLot = (index: number, field: keyof LotLine, value: any) => {
-    setLots(lots.map((lot, i) => {
-      if (i === index) {
-        return { ...lot, [field]: value }
-      }
-      return lot
-    }))
+    setLots(
+      lots.map((lot, i) => {
+        if (i === index) {
+          return { ...lot, [field]: value }
+        }
+        return lot
+      }),
+    )
   }
 
   const removeLot = (index: number) => {
@@ -119,22 +140,22 @@ export const StockReception = () => {
 
   const handleSubmit = async () => {
     if (!selectedFournisseur || lots.length === 0) return
-    
+
     setSubmitting(true)
     try {
       const data = await fetchWithAuth(`${API_URL}stock/reception/`, {
         method: 'POST',
         body: JSON.stringify({
           fournisseur_id: selectedFournisseur,
-          lignes: lots.map(item => ({
+          lignes: lots.map((item) => ({
             produit_id: item.produit_id,
             numero_lot: item.numero_lot,
             quantite: item.quantite,
             date_fabrication: item.date_fabrication,
             date_peremption: item.date_peremption,
-            prix_unitaire: item.prix_unitaire || null
-          }))
-        })
+            prix_unitaire: item.prix_unitaire || null,
+          })),
+        }),
       })
       setReceptionResult(data)
       setSuccess(true)
@@ -152,23 +173,34 @@ export const StockReception = () => {
         <Card>
           <CardContent className="pt-6 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">{translate('app.reception.stock_received')}</h2>
+            <h2 className="text-2xl font-bold mb-2">
+              {translate('app.reception.stock_received')}
+            </h2>
             <p className="text-muted-foreground mb-4">
-              <strong>{receptionResult.nombre_lots}</strong> {translate('resources.lots.name').toLowerCase()}(s) {translate('ra.action.add').toLowerCase()} {translate('app.reception.subtitle').toLowerCase()} <strong>{receptionResult.fournisseur_nom}</strong>
+              <strong>{receptionResult.nombre_lots}</strong>{' '}
+              {translate('resources.lots.name').toLowerCase()}(s){' '}
+              {translate('ra.action.add').toLowerCase()}{' '}
+              {translate('app.reception.subtitle').toLowerCase()}{' '}
+              <strong>{receptionResult.fournisseur_nom}</strong>
             </p>
             <div className="text-left bg-muted p-4 rounded-lg mb-4">
-              <h3 className="font-semibold mb-2">{translate('app.reception.lots_created')}</h3>
+              <h3 className="font-semibold mb-2">
+                {translate('app.reception.lots_created')}
+              </h3>
               {receptionResult.lots.map((lot: any, idx: number) => (
                 <p key={idx} className="text-sm">
-                  • {lot.produit_denomination} - {lot.numero_lot} (x{lot.quantite})
+                  • {lot.produit_denomination} - {lot.numero_lot} (x
+                  {lot.quantite})
                 </p>
               ))}
             </div>
-            <Button onClick={() => {
-              setSuccess(false)
-              setReceptionResult(null)
-              setSelectedFournisseur(null)
-            }}>
+            <Button
+              onClick={() => {
+                setSuccess(false)
+                setReceptionResult(null)
+                setSelectedFournisseur(null)
+              }}
+            >
               {translate('app.reception.title')}
             </Button>
           </CardContent>
@@ -184,7 +216,9 @@ export const StockReception = () => {
           <Card>
             <CardHeader>
               <CardTitle>{translate('app.reception.title')}</CardTitle>
-              <CardDescription>{translate('app.reception.subtitle')}</CardDescription>
+              <CardDescription>
+                {translate('app.reception.subtitle')}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
@@ -196,7 +230,7 @@ export const StockReception = () => {
                   className="pl-10"
                 />
               </div>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {loading ? (
                   <div className="col-span-full flex justify-center py-8">
@@ -204,26 +238,33 @@ export const StockReception = () => {
                   </div>
                 ) : produits.length === 0 ? (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
-                    {search ? translate('ra.message.no_match') : translate('ra.action.search')}
+                    {search
+                      ? translate('ra.message.no_match')
+                      : translate('ra.action.search')}
                   </div>
                 ) : (
-                  produits.map(produit => (
+                  produits.map((produit) => (
                     <Card key={produit.id} className="p-4">
                       <div className="flex justify-between items-start mb-2">
                         <div className="flex-1 min-w-0">
-                          <p className="font-medium truncate">{produit.denomination}</p>
-                          <p className="text-sm text-muted-foreground">{produit.dci}</p>
+                          <p className="font-medium truncate">
+                            {produit.denomination}
+                          </p>
+                          <p className="text-sm text-muted-foreground">
+                            {produit.dci}
+                          </p>
                           <p className="text-xs text-muted-foreground">
                             {produit.forme_pharmaceutique} • {produit.dosage}
                           </p>
                         </div>
                       </div>
-                      <Button 
-                        size="sm" 
+                      <Button
+                        size="sm"
                         className="w-full mt-2"
                         onClick={() => addLot(produit)}
                       >
-                        <Plus className="h-4 w-4 mr-1" /> {translate('ra.action.add')}
+                        <Plus className="h-4 w-4 mr-1" />{' '}
+                        {translate('ra.action.add')}
                       </Button>
                     </Card>
                   ))
@@ -234,7 +275,7 @@ export const StockReception = () => {
         </div>
 
         <div className="space-y-6">
-          <Card>
+          <Card className="lg:sticky lg:top-6 space-y-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5" />
@@ -243,14 +284,20 @@ export const StockReception = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">{translate('app.reception.supplier')}</label>
+                <label className="text-sm font-medium mb-1 block">
+                  {translate('app.reception.supplier')}
+                </label>
                 <select
-                  value={selectedFournisseur || ""}
-                  onChange={(e) => setSelectedFournisseur(Number(e.target.value))}
+                  value={selectedFournisseur || ''}
+                  onChange={(e) =>
+                    setSelectedFournisseur(Number(e.target.value))
+                  }
                   className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  <option value="">{translate('app.reception.select_supplier')}</option>
-                  {fournisseurs.map(f => (
+                  <option value="">
+                    {translate('app.reception.select_supplier')}
+                  </option>
+                  {fournisseurs.map((f) => (
                     <option key={f.id} value={f.id}>
                       {f.raison_sociale}
                     </option>
@@ -259,18 +306,27 @@ export const StockReception = () => {
               </div>
 
               <div className="border-t pt-4">
-                <label className="text-sm font-medium mb-2 block">{translate('app.reception.lots_to_receive')} ({lots.length})</label>
+                <label className="text-sm font-medium mb-2 block">
+                  {translate('app.reception.lots_to_receive')} ({lots.length})
+                </label>
                 {lots.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">{translate('app.reception.no_lot_added')}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {translate('app.reception.no_lot_added')}
+                  </p>
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
                     {lots.map((lot, index) => (
-                      <div key={index} className="border rounded-lg p-3 space-y-2">
+                      <div
+                        key={index}
+                        className="border rounded-lg p-3 space-y-2"
+                      >
                         <div className="flex justify-between items-center">
-                          <span className="font-medium text-sm truncate">{lot.denomination}</span>
-                          <Button 
-                            variant="ghost" 
-                            size="icon" 
+                          <span className="font-medium text-sm truncate">
+                            {lot.denomination}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
                             className="h-6 w-6 text-destructive"
                             onClick={() => removeLot(index)}
                           >
@@ -279,52 +335,84 @@ export const StockReception = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="text-xs text-muted-foreground">{translate('app.reception.lot_number')}</label>
+                            <label className="text-xs text-muted-foreground">
+                              {translate('app.reception.lot_number')}
+                            </label>
                             <Input
                               value={lot.numero_lot}
-                              onChange={(e) => updateLot(index, 'numero_lot', e.target.value)}
+                              onChange={(e) =>
+                                updateLot(index, 'numero_lot', e.target.value)
+                              }
                               className="h-7 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="text-xs text-muted-foreground">{translate('app.reception.quantity')}</label>
+                            <label className="text-xs text-muted-foreground">
+                              {translate('app.reception.quantity')}
+                            </label>
                             <Input
                               type="number"
                               min="1"
                               value={lot.quantite}
-                              onChange={(e) => updateLot(index, 'quantite', parseInt(e.target.value) || 1)}
+                              onChange={(e) =>
+                                updateLot(
+                                  index,
+                                  'quantite',
+                                  parseInt(e.target.value) || 1,
+                                )
+                              }
                               className="h-7 text-sm"
                             />
                           </div>
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="text-xs text-muted-foreground">{translate('app.reception.manufacturing_date')}</label>
+                            <label className="text-xs text-muted-foreground">
+                              {translate('app.reception.manufacturing_date')}
+                            </label>
                             <Input
                               type="date"
                               value={lot.date_fabrication}
-                              onChange={(e) => updateLot(index, 'date_fabrication', e.target.value)}
+                              onChange={(e) =>
+                                updateLot(
+                                  index,
+                                  'date_fabrication',
+                                  e.target.value,
+                                )
+                              }
                               className="h-7 text-sm"
                             />
                           </div>
                           <div>
-                            <label className="text-xs text-muted-foreground">{translate('app.reception.expiration_date')}</label>
+                            <label className="text-xs text-muted-foreground">
+                              {translate('app.reception.expiration_date')}
+                            </label>
                             <Input
                               type="date"
                               value={lot.date_peremption}
-                              onChange={(e) => updateLot(index, 'date_peremption', e.target.value)}
+                              onChange={(e) =>
+                                updateLot(
+                                  index,
+                                  'date_peremption',
+                                  e.target.value,
+                                )
+                              }
                               className="h-7 text-sm"
                             />
                           </div>
                         </div>
                         <div>
-                          <label className="text-xs text-muted-foreground">{translate('app.reception.unit_price')}</label>
+                          <label className="text-xs text-muted-foreground">
+                            {translate('app.reception.unit_price')}
+                          </label>
                           <Input
                             type="number"
                             step="0.01"
                             placeholder={translate('ra.validation.required')}
                             value={lot.prix_unitaire}
-                            onChange={(e) => updateLot(index, 'prix_unitaire', e.target.value)}
+                            onChange={(e) =>
+                              updateLot(index, 'prix_unitaire', e.target.value)
+                            }
                             className="h-7 text-sm"
                           />
                         </div>
@@ -335,10 +423,12 @@ export const StockReception = () => {
               </div>
             </CardContent>
             <CardFooter>
-              <Button 
-                className="w-full" 
+              <Button
+                className="w-full"
                 onClick={handleSubmit}
-                disabled={!selectedFournisseur || lots.length === 0 || submitting}
+                disabled={
+                  !selectedFournisseur || lots.length === 0 || submitting
+                }
               >
                 {submitting ? (
                   <>

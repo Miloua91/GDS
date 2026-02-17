@@ -281,6 +281,7 @@ const frenchMessages = {
         delete: 'Supprimer la sélection',
         actions: 'Actions groupées',
       },
+      bulk_actions: 'Actions groupées',
       confirm: 'Confirmer',
       close: 'Fermer',
       back: 'Retour',
@@ -382,6 +383,23 @@ const frenchMessages = {
     },
     filter: {
       remove_all_filters: 'Supprimer tous les filtres',
+    },
+    notification: {
+      updated: 'Élément mis à jour |||| %{smart_count} éléments mis à jour',
+      created: 'Élément créé',
+      deleted: 'Élément supprimé |||| %{smart_count} éléments supprimés',
+      bad_item: 'Élément incorrect',
+      item_doesnt_exist: "L'élément n'existe pas",
+      http_error: 'Erreur de communication avec le serveur',
+      data_provider_error:
+        'Erreur dataProvider. Vérifiez la console pour les détails.',
+      i18n_error:
+        'Impossible de charger les traductions pour la langue spécifiée',
+      canceled: 'Action annulée',
+      logged_out: 'Votre session est terminée, veuillez vous reconnecter.',
+      not_authorized: "Vous n'êtes pas autorisé à accéder à cette ressource.",
+      application_update_available: 'Une nouvelle version est disponible.',
+      offline: 'Pas de connectivité. Impossible de récupérer les données.',
     },
   },
   action: {
@@ -689,6 +707,7 @@ const englishMessages = {
         delete: 'Delete selected',
         actions: 'Bulk actions',
       },
+      bulk_actions: 'Bulk actions',
       confirm: 'Confirm',
       close: 'Close',
       back: 'Back',
@@ -785,6 +804,21 @@ const englishMessages = {
     },
     filter: {
       remove_all_filters: 'Remove all filters',
+    },
+    notification: {
+      updated: 'Element updated |||| %{smart_count} elements updated',
+      created: 'Element created',
+      deleted: 'Element deleted |||| %{smart_count} elements deleted',
+      bad_item: 'Incorrect element',
+      item_doesnt_exist: 'Element does not exist',
+      http_error: 'Server communication error',
+      data_provider_error: 'dataProvider error. Check the console for details.',
+      i18n_error: 'Cannot load the translations for the specified language',
+      canceled: 'Action cancelled',
+      logged_out: 'Your session has ended, please reconnect.',
+      not_authorized: "You're not authorized to access this resource.",
+      application_update_available: 'A new version is available.',
+      offline: 'No connectivity. Could not fetch data.',
     },
   },
   action: {
