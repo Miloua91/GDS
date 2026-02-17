@@ -16,6 +16,7 @@ import {
 } from 'lucide-react'
 import { dataProvider } from '@/lib/dataProvider'
 import { useTranslate } from 'ra-core'
+import { API_URL } from '@/lib/config'
 
 interface KPIs {
   stock_value: number
@@ -40,8 +41,6 @@ interface KPIs {
   }>
   pending_orders: number
 }
-
-const API_URL = 'http://localhost:8000/api/'
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('access_token')

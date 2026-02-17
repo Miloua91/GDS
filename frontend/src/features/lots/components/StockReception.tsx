@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, Package, Plus, Minus, X, Loader2, CheckCircle, Upload, FileText } from "lucide-react"
+import { API_URL } from "@/lib/config"
 
 interface Produit {
   id: number
@@ -31,8 +32,6 @@ interface LotLine {
   date_fabrication: string
   prix_unitaire: number | string
 }
-
-const API_URL = 'http://localhost:8000/api/'
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('access_token')

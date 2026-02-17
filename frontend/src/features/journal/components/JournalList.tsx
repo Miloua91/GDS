@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
 import { Loader2, Search, Package, ShoppingCart, Settings, User, FileText } from "lucide-react"
+import { API_URL } from "@/lib/config"
 
 interface Journal {
   id: number
@@ -19,8 +20,6 @@ interface Journal {
   details: Record<string, any>
   date_creation: string
 }
-
-const API_URL = 'http://localhost:8000/api/'
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('access_token')

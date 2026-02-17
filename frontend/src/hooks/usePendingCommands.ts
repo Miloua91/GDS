@@ -1,8 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
-
-const API_URL = 'http://localhost:8000/api/'
+import { API_URL } from '@/lib/config'
 
 const httpClient = (url: string, options: any = {}) => {
   if (!options.headers) {

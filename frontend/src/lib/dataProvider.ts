@@ -1,7 +1,6 @@
 import { fetchUtils } from 'ra-core'
 import type { DataProvider } from 'ra-core'
-
-const API_URL = 'http://localhost:8000/api/'
+import { API_URL } from './config'
 
 const refreshAccessToken = async (): Promise<boolean> => {
   const refreshToken = localStorage.getItem('refresh_token')

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Search, ShoppingCart, Plus, Minus, X, Loader2, CheckCircle } from "lucide-react"
 import { dataProvider } from "@/lib/dataProvider"
+import { API_URL } from "@/lib/config"
 
 interface Produit {
   id: number
@@ -28,8 +29,6 @@ interface OrderLine {
   denomination: string
   quantite_demandee: number
 }
-
-const API_URL = 'http://localhost:8000/api/'
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   const token = localStorage.getItem('access_token')
