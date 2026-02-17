@@ -59,11 +59,11 @@ export function AppSidebar() {
   }
   return (
     <Sidebar
-      variant="sidebar"
+      variant="floating"
       collapsible="icon"
       className="border-r border-border bg-white dark:bg-gray-900 h-full"
     >
-      <SidebarHeader className="border-b border-border">
+      <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton

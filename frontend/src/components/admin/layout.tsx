@@ -1,5 +1,5 @@
 import type { ErrorInfo } from 'react'
-import { Suspense, useState } from 'react'
+import { Suspense, useState, useEffect } from 'react'
 import type { CoreLayoutProps } from 'ra-core'
 import { ErrorBoundary } from 'react-error-boundary'
 import { SidebarProvider, useSidebar } from '@/components/ui/sidebar'
@@ -80,10 +80,18 @@ function WindowControls() {
 
 export const Layout = (props: CoreLayoutProps) => {
   const [errorInfo, setErrorInfo] = useState<ErrorInfo | undefined>(undefined)
+  const [currentTime, setCurrentTime] = useState(new Date())
   const handleError = (_: unknown, info: ErrorInfo) => {
     setErrorInfo(info)
   }
   const { pendingCount, isLoading: commandsLoading } = usePendingCommands()
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
   return (
     <SidebarProvider defaultOpen={false}>
@@ -131,7 +139,7 @@ export const Layout = (props: CoreLayoutProps) => {
             </span>
           )}
           <span className="ml-auto">
-            {new Date().toLocaleTimeString('fr-FR', {
+            {currentTime.toLocaleTimeString('fr-FR', {
               hour: '2-digit',
               minute: '2-digit',
             })}

@@ -136,8 +136,8 @@ export const ListPagination = ({
         <Translate
           i18nKey="ra.navigation.page_range_info"
           options={{
-            offsetBegin: pageStart,
-            offsetEnd: pageEnd,
+            offset: pageStart,
+            limit: pageEnd,
             total: total === -1 ? pageEnd : total,
           }}
         >
