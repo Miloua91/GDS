@@ -91,9 +91,10 @@ export const LoginPage = (props: { redirectTo?: string }) => {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background relative">
       <header
-        className="fixed top-0 right-0 w-full h-10 shrink-0  border-b border-border flex flex-row-reverse items-left justify-between bg-white dark:bg-gray-900 z-50"
+        className="fixed top-0 right-0 w-full h-10 shrink-0  border-b border-border flex items-center justify-between bg-white dark:bg-gray-900 z-50"
         data-tauri-drag-region
       >
+        <div className="text-center pl-2 font-bold">Pharma</div>
         <WindowControls />
       </header>
       <div className="w-full max-w-md p-8 mt-10">

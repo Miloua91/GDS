@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
+import { useTranslate } from "ra-core"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -45,6 +46,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 }
 
 export const CommandeRapide = () => {
+  const translate = useTranslate()
   const [search, setSearch] = useState("")
   const [produits, setProduits] = useState<Produit[]>([])
   const [services, setServices] = useState<Service[]>([])
@@ -152,9 +154,9 @@ export const CommandeRapide = () => {
   }
 
   const getStockBadge = (stock: number) => {
-    if (stock === 0) return <Badge variant="destructive">Rupture</Badge>
-    if (stock < 10) return <Badge variant="secondary">Stock: {stock}</Badge>
-    return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Stock: {stock}</Badge>
+    if (stock === 0) return <Badge variant="destructive">{translate('app.quick_order.stock_rupture')}</Badge>
+    if (stock < 10) return <Badge variant="secondary">{translate('app.stock.current_stock')}: {stock}</Badge>
+    return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">{translate('app.stock.current_stock')}: {stock}</Badge>
   }
 
   if (success) {
@@ -163,12 +165,12 @@ export const CommandeRapide = () => {
         <Card>
           <CardContent className="pt-6 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Commande créée!</h2>
+            <h2 className="text-2xl font-bold mb-2">{translate('app.quick_order.order_created')}</h2>
             <p className="text-muted-foreground mb-4">
-              Votre commande <strong>{orderNumber}</strong> a été soumise avec succès.
+              {translate('resources.commandes.name')} <strong>{orderNumber}</strong> {translate('ra.action.save')}
             </p>
             <Button onClick={() => setSuccess(false)}>
-              Nouvelle commande
+              {translate('app.quick_order.title')}
             </Button>
           </CardContent>
         </Card>
@@ -182,14 +184,14 @@ export const CommandeRapide = () => {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Nouvelle Commande</CardTitle>
-              <CardDescription>Recherchez et ajoutez des médicaments à votre commande</CardDescription>
+              <CardTitle>{translate('app.quick_order.title')}</CardTitle>
+              <CardDescription>{translate('app.quick_order.subtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher par code ou dénomination..."
+                  placeholder={translate('ra.action.search_placeholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -203,7 +205,7 @@ export const CommandeRapide = () => {
                   </div>
                 ) : produits.length === 0 ? (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
-                    {search ? "Aucun produit trouvé" : "Recherchez un produit pour commencer"}
+                    {search ? translate('ra.message.no_match') : translate('ra.action.search')}
                   </div>
                 ) : (
                   produits.map(produit => (
@@ -224,7 +226,7 @@ export const CommandeRapide = () => {
                         onClick={() => addToCart(produit)}
                         disabled={produit.stock_total === 0}
                       >
-                        <Plus className="h-4 w-4 mr-1" /> Ajouter
+                        <Plus className="h-4 w-4 mr-1" /> {translate('ra.action.add')}
                       </Button>
                     </Card>
                   ))
@@ -239,14 +241,14 @@ export const CommandeRapide = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5" />
-                Résumé
+                {translate('app.quick_order.articles')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {selectedService ? (
                 <div>
                   <label className="text-sm font-medium mb-1 block">
-                    {userFonction === 'ADMIN' || userFonction === 'PHARMACIEN' ? 'Service (pour)' : 'Service'}
+                    {userFonction === 'ADMIN' || userFonction === 'PHARMACIEN' ? translate('resources.services.name') : translate('resources.services.name')}
                   </label>
                   <div className="w-full h-9 rounded-md border border-input bg-muted px-3 py-1.5 text-sm">
                     {services.find(s => s.id === selectedService)?.nom}
@@ -254,13 +256,13 @@ export const CommandeRapide = () => {
                 </div>
               ) : (
                 <div>
-                  <label className="text-sm font-medium mb-1 block">Service</label>
+                  <label className="text-sm font-medium mb-1 block">{translate('app.quick_order.service')}</label>
                   <select
                     value={selectedService || ""}
                     onChange={(e) => setSelectedService(Number(e.target.value))}
                     className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                   >
-                    <option value="">Sélectionner un service</option>
+                    <option value="">{translate('app.quick_order.select_service')}</option>
                     {services.map(service => (
                       <option key={service.id} value={service.id}>
                         {service.nom}
@@ -271,9 +273,9 @@ export const CommandeRapide = () => {
               )}
 
               <div className="border-t pt-4">
-                <label className="text-sm font-medium mb-2 block">Articles ({cart.length})</label>
+                <label className="text-sm font-medium mb-2 block">{translate('app.quick_order.articles')} ({cart.length})</label>
                 {cart.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Aucun article</p>
+                  <p className="text-sm text-muted-foreground">{translate('app.quick_order.no_articles')}</p>
                 ) : (
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {cart.map(item => (
@@ -323,10 +325,10 @@ export const CommandeRapide = () => {
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Traitement...
+                    {translate('ra.page.loading')}
                   </>
                 ) : (
-                  "Passer la commande"
+                  translate('ra.action.submit')
                 )}
               </Button>
             </CardFooter>

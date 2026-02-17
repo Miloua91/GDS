@@ -49,6 +49,8 @@ export function AppSidebar() {
   const resources = useResourceDefinitions()
   const { openMobile, setOpenMobile } = useSidebar()
   const permissions = usePermissions()
+  const translate = useTranslate()
+  const label = translate('app.sidebar.dashboard')
 
   const handleClick = () => {
     if (openMobile) {
@@ -168,7 +170,7 @@ export function AppSidebar() {
                   <SidebarMenuButton asChild isActive={false}>
                     <Link to="/dashboard" onClick={handleClick}>
                       <LayoutDashboard className="!size-4" />
-                      Dashboard
+                      {label}
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -233,9 +235,7 @@ export function AppSidebar() {
  */
 export const DashboardMenuItem = ({ onClick }: { onClick?: () => void }) => {
   const translate = useTranslate()
-  const label = translate('ra.page.dashboard', {
-    _: 'Dashboard',
-  })
+  const label = translate('app.sidebar.dashboard')
   const match = useMatch({ path: '/', end: true })
   return (
     <SidebarMenuItem>
@@ -259,6 +259,7 @@ export const DashboardMenuItem = ({ onClick }: { onClick?: () => void }) => {
  * <FastOrderMenuItem onClick={handleClick} />
  */
 export const FastOrderMenuItem = ({ onClick }: { onClick?: () => void }) => {
+  const translate = useTranslate()
   const match = useMatch({ path: '/commandes-rapides', end: true })
   return (
     <SidebarMenuItem>
@@ -269,7 +270,7 @@ export const FastOrderMenuItem = ({ onClick }: { onClick?: () => void }) => {
           onClick={onClick}
         >
           <Zap />
-          Nouvelle Commande
+          {translate('app.quick_order.title')}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -290,6 +291,7 @@ export const StockReceptionMenuItem = ({
 }: {
   onClick?: () => void
 }) => {
+  const translate = useTranslate()
   const match = useMatch({ path: '/stock-reception', end: true })
   return (
     <SidebarMenuItem>
@@ -300,7 +302,7 @@ export const StockReceptionMenuItem = ({
           onClick={onClick}
         >
           <PackagePlus />
-          Réception Stock
+          {translate('app.reception.title')}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>
@@ -314,13 +316,14 @@ export const StockReceptionMenuItem = ({
  * <JournalsMenuItem onClick={handleClick} />
  */
 export const JournalsMenuItem = ({ onClick }: { onClick?: () => void }) => {
+  const translate = useTranslate()
   const match = useMatch({ path: '/journals', end: true })
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={!!match}>
         <Link to="/journals" state={{ _scrollToTop: true }} onClick={onClick}>
           <BookOpen />
-          Journaux
+          {translate('app.journal.title')}
         </Link>
       </SidebarMenuButton>
     </SidebarMenuItem>

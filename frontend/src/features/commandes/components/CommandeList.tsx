@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
+import { useTranslate } from "ra-core"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -42,39 +43,8 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
   return response.json()
 }
 
-const getStatusBadge = (statut: string) => {
-  switch (statut) {
-    case 'EN_ATTENTE':
-      return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> En attente</Badge>
-    case 'VALIDEE':
-      return <Badge className="bg-blue-500 hover:bg-blue-600"><CheckCircle className="h-3 w-3 mr-1" /> Validée</Badge>
-    case 'EN_COURS':
-      return <Badge className="bg-orange-500 hover:bg-orange-600"><Package className="h-3 w-3 mr-1" /> En cours</Badge>
-    case 'LIVREE':
-      return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="h-3 w-3 mr-1" /> Livrée</Badge>
-    case 'ANNULEE':
-      return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" /> Annulée</Badge>
-    default:
-      return <Badge>{statut}</Badge>
-  }
-}
-
-const getPriorityBadge = (priorite: string) => {
-  switch (priorite) {
-    case 'URGENTE':
-      return <Badge variant="destructive">Urgente</Badge>
-    case 'HAUTE':
-      return <Badge variant="secondary" className="bg-orange-100 text-orange-800">Haute</Badge>
-    case 'NORMALE':
-      return <Badge variant="outline">Normale</Badge>
-    case 'BASSE':
-      return <Badge variant="outline" className="bg-gray-100">Basse</Badge>
-    default:
-      return <Badge variant="outline">{priorite}</Badge>
-  }
-}
-
 export const CommandeList = () => {
+  const translate = useTranslate()
   const [activeTab, setActiveTab] = useState('EN_ATTENTE')
   const [commandes, setCommandes] = useState<Commande[]>([])
   const [loading, setLoading] = useState(true)
@@ -87,6 +57,38 @@ export const CommandeList = () => {
     ANNULEE: 0,
   })
   const [userFonction, setUserFonction] = useState<string | null>(null)
+
+  const getStatusBadge = (statut: string) => {
+    switch (statut) {
+      case 'EN_ATTENTE':
+        return <Badge variant="secondary"><Clock className="h-3 w-3 mr-1" /> {translate('ra.navigation.previous')}</Badge>
+      case 'VALIDEE':
+        return <Badge className="bg-blue-500 hover:bg-blue-600"><CheckCircle className="h-3 w-3 mr-1" /> {translate('ra.action.save')}</Badge>
+      case 'EN_COURS':
+        return <Badge className="bg-orange-500 hover:bg-orange-600"><Package className="h-3 w-3 mr-1" /> {translate('ra.page.loading')}</Badge>
+      case 'LIVREE':
+        return <Badge className="bg-green-500 hover:bg-green-600"><CheckCircle className="h-3 w-3 mr-1" /> {translate('app.journal.action.delivery')}</Badge>
+      case 'ANNULEE':
+        return <Badge variant="destructive"><XCircle className="h-3 w-3 mr-1" /> {translate('app.journal.action.cancellation')}</Badge>
+      default:
+        return <Badge>{statut}</Badge>
+    }
+  }
+
+  const getPriorityBadge = (priorite: string) => {
+    switch (priorite) {
+      case 'URGENTE':
+        return <Badge variant="destructive">{translate('app.commandes.urgent')}</Badge>
+      case 'HAUTE':
+        return <Badge variant="secondary" className="bg-orange-100 text-orange-800">{translate('app.commandes.high')}</Badge>
+      case 'NORMALE':
+        return <Badge variant="outline">{translate('app.commandes.normal')}</Badge>
+      case 'BASSE':
+        return <Badge variant="outline" className="bg-gray-100">{translate('app.commandes.low')}</Badge>
+      default:
+        return <Badge variant="outline">{priorite}</Badge>
+    }
+  }
 
   useEffect(() => {
     const user = localStorage.getItem('user')
@@ -175,16 +177,16 @@ export const CommandeList = () => {
   }
 
   const tabs = [
-    { id: 'EN_ATTENTE', label: 'En attente' },
-    { id: 'VALIDEE', label: 'Validées' },
-    { id: 'EN_COURS', label: 'En cours' },
-    { id: 'LIVREE', label: 'Livrées' },
-    { id: 'ANNULEE', label: 'Annulées' },
+    { id: 'EN_ATTENTE', label: translate('ra.navigation.previous') },
+    { id: 'VALIDEE', label: translate('ra.action.save') },
+    { id: 'EN_COURS', label: translate('ra.page.loading') },
+    { id: 'LIVREE', label: translate('app.journal.action.delivery') },
+    { id: 'ANNULEE', label: translate('app.journal.action.cancellation') },
   ]
 
   return (
     <div className="container mx-auto p-6 space-y-4">
-      <h1 className="text-2xl font-bold">Suivi des Commandes</h1>
+      <h1 className="text-2xl font-bold">{translate('app.commandes.title')}</h1>
       <Card>
         <CardHeader className="pb-0">
           <div className="flex gap-1 border-b overflow-x-auto">
@@ -217,7 +219,7 @@ export const CommandeList = () => {
             </div>
           ) : commandes.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              Aucune commande dans cette catégorie
+              {translate('ra.page.empty', { name: translate('resources.commandes.name') })}
             </div>
           ) : (
             <div className="space-y-3">
@@ -250,7 +252,7 @@ export const CommandeList = () => {
                                 ) : (
                                   <CheckCircle className="h-4 w-4 mr-1" />
                                 )}
-                                Valider
+                                {translate('ra.action.save')}
                               </Button>
                               <Button
                                 size="sm"
@@ -260,7 +262,7 @@ export const CommandeList = () => {
                                 disabled={updating === commande.id}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
-                                Annuler
+                                {translate('ra.action.delete')}
                               </Button>
                             </>
                           )}
@@ -275,7 +277,7 @@ export const CommandeList = () => {
                                 disabled={updating === commande.id}
                               >
                                 <Package className="h-4 w-4 mr-1" />
-                                En cours
+                                {translate('ra.page.loading')}
                               </Button>
                               <Button
                                 size="sm"
@@ -285,7 +287,7 @@ export const CommandeList = () => {
                                 disabled={updating === commande.id}
                               >
                                 <XCircle className="h-4 w-4 mr-1" />
-                                Annuler
+                                {translate('ra.action.delete')}
                               </Button>
                             </>
                           )}
@@ -298,7 +300,7 @@ export const CommandeList = () => {
                               disabled={updating === commande.id}
                             >
                               <CheckCircle className="h-4 w-4 mr-1" />
-                              Livrer
+                              {translate('app.journal.action.delivery')}
                             </Button>
                           )}
                         </>
@@ -306,13 +308,13 @@ export const CommandeList = () => {
                       
                       {commande.statut === 'LIVREE' && (
                         <span className="text-sm text-muted-foreground">
-                          Livrée - Ne peut plus être modifiée
+                          {translate('app.journal.action.delivery')} - {translate('ra.action.undo')}
                         </span>
                       )}
                       
                       {commande.statut === 'ANNULEE' && (
                         <span className="text-sm text-muted-foreground">
-                          Annulée
+                          {translate('app.journal.action.cancellation')}
                         </span>
                       )}
                       

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
+import { useTranslate } from "ra-core"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -48,6 +49,7 @@ const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
 }
 
 export const StockReception = () => {
+  const translate = useTranslate()
   const [search, setSearch] = useState("")
   const [produits, setProduits] = useState<Produit[]>([])
   const [fournisseurs, setFournisseurs] = useState<Fournisseur[]>([])
@@ -151,12 +153,12 @@ export const StockReception = () => {
         <Card>
           <CardContent className="pt-6 text-center">
             <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold mb-2">Stock reçu!</h2>
+            <h2 className="text-2xl font-bold mb-2">{translate('app.reception.stock_received')}</h2>
             <p className="text-muted-foreground mb-4">
-              <strong>{receptionResult.nombre_lots}</strong> lot(s) ont été ajoutés pour le fournisseur <strong>{receptionResult.fournisseur_nom}</strong>
+              <strong>{receptionResult.nombre_lots}</strong> {translate('resources.lots.name').toLowerCase()}(s) {translate('ra.action.add').toLowerCase()} {translate('app.reception.subtitle').toLowerCase()} <strong>{receptionResult.fournisseur_nom}</strong>
             </p>
             <div className="text-left bg-muted p-4 rounded-lg mb-4">
-              <h3 className="font-semibold mb-2">Lots créés:</h3>
+              <h3 className="font-semibold mb-2">{translate('app.reception.lots_created')}</h3>
               {receptionResult.lots.map((lot: any, idx: number) => (
                 <p key={idx} className="text-sm">
                   • {lot.produit_denomination} - {lot.numero_lot} (x{lot.quantite})
@@ -168,7 +170,7 @@ export const StockReception = () => {
               setReceptionResult(null)
               setSelectedFournisseur(null)
             }}>
-              Nouvelle réception
+              {translate('app.reception.title')}
             </Button>
           </CardContent>
         </Card>
@@ -182,14 +184,14 @@ export const StockReception = () => {
         <div className="lg:col-span-2 space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Réception de Stock</CardTitle>
-              <CardDescription>Ajoutez des lots de produits reçus du fournisseur</CardDescription>
+              <CardTitle>{translate('app.reception.title')}</CardTitle>
+              <CardDescription>{translate('app.reception.subtitle')}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Rechercher un produit..."
+                  placeholder={translate('ra.action.search_placeholder')}
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
@@ -203,7 +205,7 @@ export const StockReception = () => {
                   </div>
                 ) : produits.length === 0 ? (
                   <div className="col-span-full text-center py-8 text-muted-foreground">
-                    {search ? "Aucun produit trouvé" : "Recherchez un produit pour commencer"}
+                    {search ? translate('ra.message.no_match') : translate('ra.action.search')}
                   </div>
                 ) : (
                   produits.map(produit => (
@@ -222,7 +224,7 @@ export const StockReception = () => {
                         className="w-full mt-2"
                         onClick={() => addLot(produit)}
                       >
-                        <Plus className="h-4 w-4 mr-1" /> Ajouter Lot
+                        <Plus className="h-4 w-4 mr-1" /> {translate('ra.action.add')}
                       </Button>
                     </Card>
                   ))
@@ -237,18 +239,18 @@ export const StockReception = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Package className="h-5 w-5" />
-                Détails de réception
+                {translate('ra.action.show')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium mb-1 block">Fournisseur</label>
+                <label className="text-sm font-medium mb-1 block">{translate('app.reception.supplier')}</label>
                 <select
                   value={selectedFournisseur || ""}
                   onChange={(e) => setSelectedFournisseur(Number(e.target.value))}
                   className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                 >
-                  <option value="">Sélectionner un fournisseur</option>
+                  <option value="">{translate('app.reception.select_supplier')}</option>
                   {fournisseurs.map(f => (
                     <option key={f.id} value={f.id}>
                       {f.raison_sociale}
@@ -258,9 +260,9 @@ export const StockReception = () => {
               </div>
 
               <div className="border-t pt-4">
-                <label className="text-sm font-medium mb-2 block">Lots à recevoir ({lots.length})</label>
+                <label className="text-sm font-medium mb-2 block">{translate('app.reception.lots_to_receive')} ({lots.length})</label>
                 {lots.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Aucun lot ajouté</p>
+                  <p className="text-sm text-muted-foreground">{translate('app.reception.no_lot_added')}</p>
                 ) : (
                   <div className="space-y-4 max-h-96 overflow-y-auto">
                     {lots.map((lot, index) => (
@@ -278,7 +280,7 @@ export const StockReception = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="text-xs text-muted-foreground">N° Lot</label>
+                            <label className="text-xs text-muted-foreground">{translate('app.reception.lot_number')}</label>
                             <Input
                               value={lot.numero_lot}
                               onChange={(e) => updateLot(index, 'numero_lot', e.target.value)}
@@ -286,7 +288,7 @@ export const StockReception = () => {
                             />
                           </div>
                           <div>
-                            <label className="text-xs text-muted-foreground">Quantité</label>
+                            <label className="text-xs text-muted-foreground">{translate('app.reception.quantity')}</label>
                             <Input
                               type="number"
                               min="1"
@@ -298,7 +300,7 @@ export const StockReception = () => {
                         </div>
                         <div className="grid grid-cols-2 gap-2">
                           <div>
-                            <label className="text-xs text-muted-foreground">Date fabrication</label>
+                            <label className="text-xs text-muted-foreground">{translate('app.reception.manufacturing_date')}</label>
                             <Input
                               type="date"
                               value={lot.date_fabrication}
@@ -307,7 +309,7 @@ export const StockReception = () => {
                             />
                           </div>
                           <div>
-                            <label className="text-xs text-muted-foreground">Date expiration</label>
+                            <label className="text-xs text-muted-foreground">{translate('app.reception.expiration_date')}</label>
                             <Input
                               type="date"
                               value={lot.date_peremption}
@@ -317,11 +319,11 @@ export const StockReception = () => {
                           </div>
                         </div>
                         <div>
-                          <label className="text-xs text-muted-foreground">Prix unitaire (DZD)</label>
+                          <label className="text-xs text-muted-foreground">{translate('app.reception.unit_price')}</label>
                           <Input
                             type="number"
                             step="0.01"
-                            placeholder="Optionnel"
+                            placeholder={translate('ra.validation.required')}
                             value={lot.prix_unitaire}
                             onChange={(e) => updateLot(index, 'prix_unitaire', e.target.value)}
                             className="h-7 text-sm"
@@ -342,10 +344,10 @@ export const StockReception = () => {
                 {submitting ? (
                   <>
                     <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Traitement...
+                    {translate('ra.page.loading')}
                   </>
                 ) : (
-                  "Confirmer la réception"
+                  translate('ra.action.confirm')
                 )}
               </Button>
             </CardFooter>

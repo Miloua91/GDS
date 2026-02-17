@@ -112,6 +112,16 @@ export default function App() {
             <CustomRoute path="/stock" element={<StockList />} />
           )}
         </CustomRoutes>
+        {permissions.can_view_commandes && (
+          <Resource
+            name="commandes"
+            icon={ShoppingCart}
+            list={CommandeList}
+            show={CommandeShow}
+            create={permissions.can_add_commandes ? CommandeCreate : undefined}
+            edit={permissions.can_change_commandes ? CommandeEdit : undefined}
+          />
+        )}
         {permissions.can_view_produits && (
           <Resource
             name="produits"
@@ -158,16 +168,7 @@ export default function App() {
             }
           />
         )}
-        {permissions.can_view_commandes && (
-          <Resource
-            name="commandes"
-            icon={ShoppingCart}
-            list={CommandeList}
-            show={CommandeShow}
-            create={permissions.can_add_commandes ? CommandeCreate : undefined}
-            edit={permissions.can_change_commandes ? CommandeEdit : undefined}
-          />
-        )}
+
         {permissions.can_view_magasins && (
           <Resource
             name="magasins"

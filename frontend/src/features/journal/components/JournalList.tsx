@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
+import { useTranslate } from "ra-core"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -56,45 +57,46 @@ const getCategoryIcon = (categorie: string) => {
   }
 }
 
-const getCategoryBadge = (categorie: string) => {
+const getCategoryBadge = (categorie: string, translate: any) => {
   switch (categorie) {
     case 'COMMANDE':
-      return <Badge className="bg-blue-500">Commande</Badge>
+      return <Badge className="bg-blue-500">{translate('app.journal.category.commande')}</Badge>
     case 'STOCK':
-      return <Badge className="bg-green-500">Stock</Badge>
+      return <Badge className="bg-green-500">{translate('app.journal.category.stock')}</Badge>
     case 'PRODUIT':
-      return <Badge className="bg-purple-500">Produit</Badge>
+      return <Badge className="bg-purple-500">{translate('app.journal.category.produit')}</Badge>
     case 'UTILISATEUR':
-      return <Badge className="bg-orange-500">Utilisateur</Badge>
+      return <Badge className="bg-orange-500">{translate('app.journal.category.utilisateur')}</Badge>
     case 'SYSTEM':
-      return <Badge className="bg-gray-500">Système</Badge>
+      return <Badge className="bg-gray-500">{translate('app.journal.category.system')}</Badge>
     default:
       return <Badge>{categorie}</Badge>
   }
 }
 
-const getActionBadge = (action: string) => {
+const getActionBadge = (action: string, translate: any) => {
   switch (action) {
     case 'CREATE':
-      return <Badge variant="outline" className="text-green-600 border-green-200">Création</Badge>
+      return <Badge variant="outline" className="text-green-600 border-green-200">{translate('app.journal.action.create')}</Badge>
     case 'UPDATE':
-      return <Badge variant="outline" className="text-blue-600 border-blue-200">Modification</Badge>
+      return <Badge variant="outline" className="text-blue-600 border-blue-200">{translate('app.journal.action.update')}</Badge>
     case 'DELETE':
-      return <Badge variant="outline" className="text-red-600 border-red-200">Suppression</Badge>
+      return <Badge variant="outline" className="text-red-600 border-red-200">{translate('app.journal.action.delete')}</Badge>
     case 'VALIDATE':
-      return <Badge variant="outline" className="text-green-600 border-green-200">Validation</Badge>
+      return <Badge variant="outline" className="text-green-600 border-green-200">{translate('app.journal.action.validation')}</Badge>
     case 'ANNUL':
-      return <Badge variant="destructive">Annulation</Badge>
+      return <Badge variant="destructive">{translate('app.journal.action.cancellation')}</Badge>
     case 'LIVRE':
-      return <Badge className="bg-green-500">Livraison</Badge>
+      return <Badge className="bg-green-500">{translate('app.journal.action.delivery')}</Badge>
     case 'RECEPTION':
-      return <Badge className="bg-teal-500">Réception</Badge>
+      return <Badge className="bg-teal-500">{translate('app.journal.action.reception')}</Badge>
     default:
       return <Badge variant="outline">{action}</Badge>
   }
 }
 
 export const JournalList = () => {
+  const translate = useTranslate()
   const [activeTab, setActiveTab] = useState('ALL')
   const [journals, setJournals] = useState<Journal[]>([])
   const [loading, setLoading] = useState(true)
@@ -130,11 +132,11 @@ export const JournalList = () => {
   }, [fetchJournals])
 
   const tabs = [
-    { id: 'ALL', label: 'Tout' },
-    { id: 'COMMANDE', label: 'Commandes' },
-    { id: 'STOCK', label: 'Stock' },
-    { id: 'PRODUIT', label: 'Produits' },
-    { id: 'UTILISATEUR', label: 'Utilisateurs' },
+    { id: 'ALL', label: translate('ra.action.all') },
+    { id: 'COMMANDE', label: translate('app.journal.category.commande') },
+    { id: 'STOCK', label: translate('app.journal.category.stock') },
+    { id: 'PRODUIT', label: translate('app.journal.category.produit') },
+    { id: 'UTILISATEUR', label: translate('app.journal.category.utilisateur') },
   ]
 
   const totalPages = Math.ceil(total / 20)
@@ -165,7 +167,7 @@ export const JournalList = () => {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Rechercher dans les journaux..."
+                placeholder={translate('ra.action.search_placeholder')}
                 value={search}
                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                 className="pl-10"
@@ -179,7 +181,7 @@ export const JournalList = () => {
             </div>
           ) : journals.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              Aucun journal dans cette catégorie
+              {translate('ra.page.empty', { name: translate('app.journal.title') })}
             </div>
           ) : (
             <div className="space-y-3">
@@ -191,8 +193,8 @@ export const JournalList = () => {
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-2">
-                        {getCategoryBadge(journal.categorie)}
-                        {getActionBadge(journal.action)}
+                        {getCategoryBadge(journal.categorie, translate)}
+                        {getActionBadge(journal.action, translate)}
                         {journal.ancien_statut && journal.nouveau_statut && (
                           <Badge variant="secondary" className="font-mono text-xs">
                             {journal.ancien_statut} → {journal.nouveau_statut}
@@ -202,12 +204,12 @@ export const JournalList = () => {
                       <p className="text-sm">{journal.description}</p>
                       <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
                         {journal.utilisateur && (
-                          <span>Par: <span className="font-medium">{journal.utilisateur}</span></span>
+                          <span>{translate('app.journal.by')} <span className="font-medium">{journal.utilisateur}</span></span>
                         )}
                         {journal.entity_description && (
-                          <span>Entité: <span className="font-medium">{journal.entity_description}</span></span>
+                          <span>{translate('app.journal.entity')} <span className="font-medium">{journal.entity_description}</span></span>
                         )}
-                        <span>Le: {new Date(journal.date_creation).toLocaleString('fr-FR')}</span>
+                        <span>{translate('app.journal.date')} {new Date(journal.date_creation).toLocaleString()}</span>
                       </div>
                     </div>
                   </div>
@@ -223,17 +225,17 @@ export const JournalList = () => {
                 disabled={page === 1}
                 className="px-3 py-1 text-sm border rounded disabled:opacity-50"
               >
-                Précédent
+                {translate('ra.navigation.previous')}
               </button>
               <span className="text-sm text-muted-foreground">
-                Page {page} sur {totalPages}
+                {translate('ra.navigation.page')} {page} {translate('ra.action.sort')} {totalPages}
               </span>
               <button
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages}
                 className="px-3 py-1 text-sm border rounded disabled:opacity-50"
               >
-                Suivant
+                {translate('ra.navigation.next')}
               </button>
             </div>
           )}

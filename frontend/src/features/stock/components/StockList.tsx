@@ -22,13 +22,14 @@ const getStockStatus = (item: StockItem) => {
 }
 
 const StockStatusBadge = ({ item }: { item: StockItem }) => {
+  const translate = useTranslate()
   const status = getStockStatus(item)
   
   if (status === "rupture") {
     return (
       <Badge variant="destructive" className="gap-1">
         <XCircle className="h-3 w-3" />
-        Rupture
+        {translate('app.stock.rupture')}
       </Badge>
     )
   }
@@ -37,7 +38,7 @@ const StockStatusBadge = ({ item }: { item: StockItem }) => {
     return (
       <Badge className="bg-orange-500 gap-1">
         <AlertTriangle className="h-3 w-3" />
-        Alerte
+        {translate('app.stock.in_alert')}
       </Badge>
     )
   }
@@ -45,7 +46,7 @@ const StockStatusBadge = ({ item }: { item: StockItem }) => {
   return (
     <Badge variant="secondary" className="bg-green-100 text-green-800 gap-1">
       <CheckCircle className="h-3 w-3" />
-      OK
+      {translate('app.stock.available')}
     </Badge>
   )
 }
@@ -69,13 +70,13 @@ export const StockList = () => {
   return (
     <div className="container mx-auto p-6 space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{translate("ra.page.stock", { _: "Stock" })}</h1>
+        <h1 className="text-3xl font-bold">{translate("app.stock.title")}</h1>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Produits</CardTitle>
+            <CardTitle className="text-sm font-medium">{translate('app.stock.total_products')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{total}</div>
@@ -83,7 +84,7 @@ export const StockList = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-orange-600">En alerte</CardTitle>
+            <CardTitle className="text-sm font-medium text-orange-600">{translate('app.stock.in_alert')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
@@ -93,7 +94,7 @@ export const StockList = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-red-600">Rupture</CardTitle>
+            <CardTitle className="text-sm font-medium text-red-600">{translate('app.stock.rupture')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
@@ -103,7 +104,7 @@ export const StockList = () => {
         </Card>
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-green-600">Disponibles</CardTitle>
+            <CardTitle className="text-sm font-medium text-green-600">{translate('app.stock.available')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
@@ -116,7 +117,7 @@ export const StockList = () => {
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder="Rechercher un produit..."
+          placeholder={translate('ra.action.search_placeholder')}
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
           className="pl-10"
@@ -127,15 +128,15 @@ export const StockList = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[100px]">Code</TableHead>
-              <TableHead>Produit</TableHead>
-              <TableHead>Forme</TableHead>
-              <TableHead>DCI</TableHead>
-              <TableHead className="text-right">Stock</TableHead>
-              <TableHead className="text-right">Alerte</TableHead>
-              <TableHead className="text-right">Sécurité</TableHead>
-              <TableHead className="text-center">Lots</TableHead>
-              <TableHead className="text-center">Statut</TableHead>
+              <TableHead className="w-[100px]">{translate('app.stock.code')}</TableHead>
+              <TableHead>{translate('app.stock.product')}</TableHead>
+              <TableHead>{translate('app.stock.form')}</TableHead>
+              <TableHead>{translate('app.stock.dci')}</TableHead>
+              <TableHead className="text-right">{translate('app.stock.current_stock')}</TableHead>
+              <TableHead className="text-right">{translate('app.stock.alert')}</TableHead>
+              <TableHead className="text-right">{translate('app.stock.security')}</TableHead>
+              <TableHead className="text-center">{translate('app.stock.lots')}</TableHead>
+              <TableHead className="text-center">{translate('app.stock.status')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -148,7 +149,7 @@ export const StockList = () => {
             ) : stock.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={9} className="h-24 text-center">
-                  Aucun produit trouvé
+                  {translate('ra.page.empty', { name: translate('resources.produits.name') })}
                 </TableCell>
               </TableRow>
             ) : (
@@ -182,7 +183,7 @@ export const StockList = () => {
 
       <div className="flex items-center justify-between">
         <div className="text-sm text-muted-foreground">
-          Affichage de {(page - 1) * ITEMS_PER_PAGE + 1} à {Math.min(page * ITEMS_PER_PAGE, total)} sur {total} résultats
+          {translate('ra.navigation.page_range_info', { offset: (page - 1) * ITEMS_PER_PAGE + 1, limit: Math.min(page * ITEMS_PER_PAGE, total), total })}
         </div>
         <div className="flex items-center gap-2">
           <Button
@@ -194,7 +195,7 @@ export const StockList = () => {
             <ChevronLeft className="h-4 w-4" />
           </Button>
           <span className="text-sm">
-            Page {page} sur {totalPages || 1}
+            {translate('ra.navigation.page')} {page} {translate('ra.action.sort')} {totalPages || 1}
           </span>
           <Button
             variant="outline"
