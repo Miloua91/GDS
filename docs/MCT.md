@@ -78,7 +78,7 @@ flowchart TD
 ## Diagramme des Opérations par Domaine
 
 ```mermaid
-flowchart LR
+flowchart
     subgraph COMMANDES["  COMMANDES  "]
         direction TB
         C1["Nouvelle Commande"]
