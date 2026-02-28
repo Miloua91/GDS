@@ -33,17 +33,23 @@ function SidebarToggle() {
 }
 
 function WindowControls() {
+  const isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__
+  if (!isTauri) return null
+
   const handleMinimize = async () => {
+    if (!isTauri) return
     const window = getCurrentWindow()
     await window.minimize()
   }
 
   const handleMaximize = async () => {
+    if (!isTauri) return
     const window = getCurrentWindow()
     await window.toggleMaximize()
   }
 
   const handleClose = async () => {
+    if (!isTauri) return
     const window = getCurrentWindow()
     await window.close()
   }

@@ -41,8 +41,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 })
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  const isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__
+
   useEffect(() => {
-    getCurrentWindow().show()
+    if (isTauri) {
+      getCurrentWindow().show()
+    }
   }, [])
 
   return (

@@ -8,6 +8,9 @@ import { Square, X, Minus } from 'lucide-react'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 
 function WindowControls() {
+  const isTauri = typeof window !== 'undefined' && !!window.__TAURI_INTERNALS__
+  if (!isTauri) return null
+
   const handleMinimize = async () => {
     const window = getCurrentWindow()
     await window.minimize()
