@@ -109,6 +109,7 @@ export const authProvider: AuthProvider = {
         username: user.username,
         email: user.email,
         fonction: user.fonction,
+        is_superuser: user.is_superuser,
         service: user.service,
         service_id: user.service_id,
         role: user.role,

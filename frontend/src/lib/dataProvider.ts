@@ -121,6 +121,16 @@ export const dataProvider: DataProvider = {
     }))
   },
 
+  deleteMany: (resource, params) => {
+    return Promise.all(
+      params.ids.map((id) =>
+        httpClient(`${API_URL}${resource}/${id}/`, {
+          method: 'DELETE',
+        })
+      )
+    ).then(() => ({ data: params.ids }))
+  },
+
   getMany: (resource, params) => {
     const query = {
       id__in: params.ids.join(','),

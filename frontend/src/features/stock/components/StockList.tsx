@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react"
+import { useState, useMemo, useCallback, useEffect } from "react"
 import { useTranslate } from "ra-core"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { AlertTriangle, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight } from "lucide-react"
+import { AlertTriangle, CheckCircle, XCircle, Search, ChevronLeft, ChevronRight, Warehouse } from "lucide-react"
 import { useStock, type StockItem } from "@/hooks/useStock"
 
 const getStockStatus = (item: StockItem) => {
@@ -57,6 +57,17 @@ export const StockList = () => {
   const translate = useTranslate()
   const [search, setSearch] = useState("")
   const [page, setPage] = useState(1)
+  const [userServiceId, setUserServiceId] = useState<number | null>(null)
+  const [isSuperuser, setIsSuperuser] = useState(false)
+  
+  useEffect(() => {
+    const user = localStorage.getItem('user')
+    if (user) {
+      const userData = JSON.parse(user)
+      setUserServiceId(userData.service_id)
+      setIsSuperuser(userData.is_superuser || false)
+    }
+  }, [])
   
   const { stock, total, isLoading, refetch } = useStock(page, search)
   
@@ -66,6 +77,29 @@ export const StockList = () => {
     setSearch(value)
     setPage(1)
   }, [])
+
+  const hasNoService = !userServiceId && !isSuperuser
+
+  if (hasNoService) {
+    return (
+      <div className="container mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">{translate("app.stock.title")}</h1>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-center py-8">
+              <Warehouse className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-lg font-medium mb-2">
+                Aucun service assigné
+              </p>
+              <p className="text-muted-foreground">
+                Veuillez contacter l'administrateur pour qu'il vous assigne un service.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="container mx-auto p-6 space-y-4">

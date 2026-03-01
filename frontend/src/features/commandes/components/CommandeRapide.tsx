@@ -15,7 +15,6 @@ import {
   Search,
   ShoppingCart,
   Plus,
-  Minus,
   X,
   Loader2,
   CheckCircle,
@@ -130,20 +129,6 @@ export const CommandeRapide = () => {
         },
       ])
     }
-  }
-
-  const updateQuantity = (produit_id: number, delta: number) => {
-    setCart(
-      cart
-        .map((item) => {
-          if (item.produit_id === produit_id) {
-            const newQty = item.quantite_demandee + delta
-            return newQty > 0 ? { ...item, quantite_demandee: newQty } : item
-          }
-          return item
-        })
-        .filter((item) => item.quantite_demandee > 0),
-    )
   }
 
   const removeFromCart = (produit_id: number) => {
@@ -366,25 +351,22 @@ export const CommandeRapide = () => {
                           <p className="truncate">{item.denomination}</p>
                         </div>
                         <div className="flex items-center gap-1">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => updateQuantity(item.produit_id, -1)}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </Button>
-                          <span className="w-8 text-center">
-                            {item.quantite_demandee}
-                          </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6"
-                            onClick={() => updateQuantity(item.produit_id, 1)}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </Button>
+                          <Input
+                            type="number"
+                            min="1"
+                            value={item.quantite_demandee}
+                            onChange={(e) => {
+                              const newQty = parseInt(e.target.value) || 1
+                              setCart(
+                                cart.map((c) =>
+                                  c.produit_id === item.produit_id
+                                    ? { ...c, quantite_demandee: newQty > 0 ? newQty : 1 }
+                                    : c
+                                ).filter((c) => c.quantite_demandee > 0)
+                              )
+                            }}
+                            className="h-7 w-16 text-center"
+                          />
                           <Button
                             variant="ghost"
                             size="icon"

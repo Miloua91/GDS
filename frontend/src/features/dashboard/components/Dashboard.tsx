@@ -118,6 +118,7 @@ export const Dashboard = () => {
   const [error, setError] = useState<string | null>(null)
   const [userServiceId, setUserServiceId] = useState<number | null>(null)
   const [userFonction, setUserFonction] = useState<string | null>(null)
+  const [isSuperuser, setIsSuperuser] = useState(false)
   const [pendingOrders, setPendingOrders] = useState(0)
 
   useEffect(() => {
@@ -126,6 +127,7 @@ export const Dashboard = () => {
       const userData = JSON.parse(user)
       setUserServiceId(userData.service_id)
       setUserFonction(userData.fonction)
+      setIsSuperuser(userData.is_superuser || false)
     }
   }, [])
 
@@ -181,12 +183,38 @@ export const Dashboard = () => {
       })
   }, [])
 
+  // Show message if user has no service assigned (and is not superuser)
+  const hasNoService = !userServiceId && !isSuperuser
+
   if (loading) {
     return (
       <div className="container mx-auto p-6">
         <div className="flex items-center justify-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
         </div>
+      </div>
+    )
+  }
+
+  if (hasNoService) {
+    return (
+      <div className="container mx-auto p-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>{translate('app.dashboard.title')}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-center py-8">
+              <Warehouse className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-lg font-medium mb-2">
+                Aucun service assigné
+              </p>
+              <p className="text-muted-foreground">
+                Veuillez contacter l'administrateur pour qu'il vous assigne un service.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     )
   }
@@ -220,16 +248,16 @@ export const Dashboard = () => {
         <Card className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
           <CardHeader className="pb-2">
             <CardDescription>
-              {translate('app.dashboard.stock_value')}
+              {translate('app.dashboard.products_in_stock')}
             </CardDescription>
             <CardTitle className="text-2xl">
-              {formatCurrency(kpis.stock_value)}
+              {kpis.products_with_stock}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="flex items-center text-sm text-muted-foreground">
               <TrendingUp className="h-4 w-4 mr-1 text-blue-600" />
-              {translate('ra.sort.ascending')}
+              {translate('app.dashboard.total_products')}: {kpis.total_products}
             </div>
           </CardContent>
         </Card>
@@ -409,7 +437,7 @@ export const Dashboard = () => {
         </Card>
       </div>
 
-      {magazineOrders && magazineOrders.magasins.length > 0 && (
+      {isSuperuser && magazineOrders && magazineOrders.magasins.length > 0 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold flex items-center gap-2">
             <Warehouse className="h-6 w-6" />

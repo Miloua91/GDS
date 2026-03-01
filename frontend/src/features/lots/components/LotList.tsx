@@ -11,6 +11,11 @@ export const LotList = () => {
             <TextField source="denomination" />
           </ReferenceField>
         </DataTable.Col>
+        <DataTable.Col source="magasin" label="Magasin">
+          <ReferenceField source="magasin" reference="magasins" link="show">
+            <TextField source="nom" />
+          </ReferenceField>
+        </DataTable.Col>
         <DataTable.Col source="date_fabrication" label="Date Fabrication" />
         <DataTable.Col source="date_peremption" label="Date Péremption" />
         <DataTable.Col source="date_reception" label="Date Réception" />

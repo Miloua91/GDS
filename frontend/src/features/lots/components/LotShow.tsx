@@ -9,6 +9,9 @@ export const LotShow = () => {
         <ReferenceField source="produit" reference="produits" link="show">
           <TextField source="denomination" label="Produit" />
         </ReferenceField>
+        <ReferenceField source="magasin" reference="magasins" link="show">
+          <TextField source="nom" label="Magasin" />
+        </ReferenceField>
         <DateField source="date_fabrication" label="Date Fabrication" />
         <DateField source="date_peremption" label="Date Péremption" />
         <DateField source="date_reception" label="Date Réception" />
