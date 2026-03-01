@@ -1,4 +1,4 @@
-import { Edit, SimpleForm, TextInput, NumberInput, BooleanInput } from "@/components/admin"
+import { Edit, SimpleForm, TextInput, NumberInput, BooleanInput, ReferenceInput, SelectInput } from "@/components/admin"
 
 export const ServiceEdit = () => {
   return (
@@ -11,6 +11,9 @@ export const ServiceEdit = () => {
         <TextInput source="specialite" label="Spécialité" />
         <NumberInput source="nombre_lits" label="Nombre Lits" />
         <BooleanInput source="actif" label="Actif" />
+        <ReferenceInput source="magasin" reference="magasins" label="Magasin par défaut" allowEmpty>
+          <SelectInput optionText="nom" optionValue="id" />
+        </ReferenceInput>
       </SimpleForm>
     </Edit>
   )

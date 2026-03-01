@@ -13,6 +13,7 @@ import {
   Clock,
   AlertCircle,
   CheckCircle,
+  Warehouse,
 } from 'lucide-react'
 import { dataProvider } from '@/lib/dataProvider'
 import { useTranslate } from 'ra-core'
@@ -40,6 +41,37 @@ interface KPIs {
     jours_restants: number
   }>
   pending_orders: number
+}
+
+interface MagazineOrder {
+  id: number
+  numero_commande: string
+  service_nom: string
+  statut: string
+  priorite: string
+  date_demande: string
+}
+
+interface MagazineOrders {
+  id: number
+  nom: string
+  type_magasin: string
+  pending_count: number
+  in_progress_count: number
+  delivered_count: number
+  total_count: number
+  pending_orders: MagazineOrder[]
+  services_count: number
+}
+
+interface MagazineOrdersResponse {
+  magasins: MagazineOrders[]
+  totals: {
+    pending: number
+    in_progress: number
+    delivered: number
+    total: number
+  }
 }
 
 const fetchWithAuth = async (url: string, options: RequestInit = {}) => {
@@ -81,6 +113,7 @@ const formatCurrency = (value: number) => {
 export const Dashboard = () => {
   const translate = useTranslate()
   const [kpis, setKpis] = useState<KPIs | null>(null)
+  const [magazineOrders, setMagazineOrders] = useState<MagazineOrdersResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userServiceId, setUserServiceId] = useState<number | null>(null)
@@ -137,6 +170,16 @@ export const Dashboard = () => {
       fetchPendingOrders()
     }
   }, [loading, fetchPendingOrders])
+
+  useEffect(() => {
+    fetchWithAuth(`${API_URL}dashboard/magasins-orders/`)
+      .then((data) => {
+        setMagazineOrders(data)
+      })
+      .catch((err) => {
+        console.error('Dashboard - Erreur magazines:', err)
+      })
+  }, [])
 
   if (loading) {
     return (
@@ -365,6 +408,72 @@ export const Dashboard = () => {
           </CardHeader>
         </Card>
       </div>
+
+      {magazineOrders && magazineOrders.magasins.length > 0 && (
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <Warehouse className="h-6 w-6" />
+            Commandes par Magasin
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {magazineOrders.magasins.map((mag) => (
+              <Card key={mag.id}>
+                <CardHeader>
+                  <CardTitle className="text-lg">{mag.nom}</CardTitle>
+                  <CardDescription>
+                    {mag.type_magasin} • {mag.services_count} services
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-3 gap-2 text-center mb-4">
+                    <div className="bg-orange-50 dark:bg-orange-950 rounded-lg p-2">
+                      <div className="text-2xl font-bold text-orange-600">
+                        {mag.pending_count}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        En attente
+                      </div>
+                    </div>
+                    <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-2">
+                      <div className="text-2xl font-bold text-blue-600">
+                        {mag.in_progress_count}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        En cours
+                      </div>
+                    </div>
+                    <div className="bg-green-50 dark:bg-green-950 rounded-lg p-2">
+                      <div className="text-2xl font-bold text-green-600">
+                        {mag.delivered_count}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Livrées
+                      </div>
+                    </div>
+                  </div>
+                  {mag.pending_orders.length > 0 && (
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Commandes en attente:</p>
+                      {mag.pending_orders.slice(0, 3).map((order) => (
+                        <div
+                          key={order.id}
+                          className="text-sm p-2 bg-muted rounded flex justify-between"
+                        >
+                          <span>{order.numero_commande}</span>
+                          <span className="text-muted-foreground">
+                            {order.service_nom}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
