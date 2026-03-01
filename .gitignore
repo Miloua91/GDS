@@ -103,3 +103,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Allow frontend/src/lib
+!frontend/src/lib/
