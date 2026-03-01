@@ -61,6 +61,15 @@ def should_prepare_database(argv: list[str]) -> bool:
     return "runserver" in argv
 
 
+django.setup()
+
+# Force imports that are commonly missed in frozen builds due dynamic loading.
+# These imports are intentionally unused and ensure app initialization is stable.
+import core.api_urls  # noqa: F401,E402
+import core.models  # noqa: F401,E402
+import core.serializers  # noqa: F401,E402
+import rest_framework_simplejwt.authentication  # noqa: F401,E402
+
 if __name__ == "__main__":
     if should_prepare_database(sys.argv):
         ensure_database_ready()
