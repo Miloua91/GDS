@@ -27,10 +27,10 @@ jobs:
 
       - name: Build with PyInstaller
         run: |
-          pyinstaller --name pharmacie --windowed --onefile --add-data "pharmacie;pharmacie" --hidden-import django --hidden-import django.contrib.auth --hidden-import rest_framework --hidden-import corsheaders --collect-all django --collect-all rest_framework --noconfirm --clean pharmacie/pharmacie/wsgi.py
+          pyinstaller --name pharmacie --windowed --onefile --add-data "pharmacie;pharmacie" --hidden-import django --hidden-import django.contrib.auth --hidden-import rest_framework --hidden-import corsheaders --collect-all django --collect-all rest_framework --noconfirm --clean pharmacie/run_exe.py
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: pharma-server
-          path: dist/pharmacie/
+          path: dist/pharmacie.exe
