@@ -17,4 +17,15 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "pharmacie.settings")
 from django.core.management import execute_from_command_line
 
 if __name__ == "__main__":
-    execute_from_command_line(sys.argv)
+    # Automatically start the server if no arguments provided
+    if len(sys.argv) == 1:
+        print("Starting Pharmacy Server...")
+        print("Server running at http://localhost:8000")
+        execute_from_command_line(
+            ["run_exe.py", "runserver", "0.0.0.0:8000", "--noreload"]
+        )
+    else:
+        # Ensure --noreload is always added to prevent issues
+        if "runserver" in sys.argv and "--noreload" not in sys.argv:
+            sys.argv.append("--noreload")
+        execute_from_command_line(sys.argv)
