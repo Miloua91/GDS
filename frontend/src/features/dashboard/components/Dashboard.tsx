@@ -417,19 +417,19 @@ export const Dashboard = () => {
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {magazineOrders.magasins.map((mag) => (
-              <Card key={mag.id}>
+            {magazineOrders.magasins.map((mag: any) => (
+              <Card key={mag.service_id}>
                 <CardHeader>
-                  <CardTitle className="text-lg">{mag.nom}</CardTitle>
+                  <CardTitle className="text-lg">{mag.service_nom}</CardTitle>
                   <CardDescription>
-                    {mag.type_magasin} • {mag.services_count} services
+                    {mag.service_code}
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-3 gap-2 text-center mb-4">
                     <div className="bg-orange-50 dark:bg-orange-950 rounded-lg p-2">
                       <div className="text-2xl font-bold text-orange-600">
-                        {mag.pending_count}
+                        {mag.en_attente}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         En attente
@@ -437,7 +437,7 @@ export const Dashboard = () => {
                     </div>
                     <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-2">
                       <div className="text-2xl font-bold text-blue-600">
-                        {mag.in_progress_count}
+                        {mag.en_cours}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         En cours
@@ -445,17 +445,17 @@ export const Dashboard = () => {
                     </div>
                     <div className="bg-green-50 dark:bg-green-950 rounded-lg p-2">
                       <div className="text-2xl font-bold text-green-600">
-                        {mag.delivered_count}
+                        {mag.livree}
                       </div>
                       <div className="text-xs text-muted-foreground">
                         Livrées
                       </div>
                     </div>
                   </div>
-                  {mag.pending_orders.length > 0 && (
+                  {mag.pending_orders && mag.pending_orders.length > 0 && (
                     <div className="space-y-2">
                       <p className="text-sm font-medium">Commandes en attente:</p>
-                      {mag.pending_orders.slice(0, 3).map((order) => (
+                      {mag.pending_orders.slice(0, 3).map((order: any) => (
                         <div
                           key={order.id}
                           className="text-sm p-2 bg-muted rounded flex justify-between"
