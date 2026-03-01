@@ -13,6 +13,8 @@ from .models import (
     CommandeService, LigneCommandeService, Magasin, Service, Utilisateur,
     Role, Permission, Journal
 )
+
+from django.db.models import Count, Q
 from .serializers import (
     ProduitSerializer, LotSerializer, MouvementSerializer,
     FournisseurSerializer, ServiceSerializer, CommandeSerializer,
@@ -260,6 +262,14 @@ class MouvementViewSet(LoggingMixin, viewsets.ModelViewSet):
             return MouvementStock.objects.none()
         
         queryset = super().get_queryset()
+        
+        # Filter by user's service's magasin if they have one assigned
+        if hasattr(user, 'service') and user.service and user.service.magasin:
+            user_magasin = user.service.magasin
+            queryset = queryset.filter(
+                Q(magasin_source=user_magasin) | Q(magasin_destination=user_magasin)
+            )
+        
         queryset = apply_filtering(queryset, self.request, ['type_mouvement', 'numero_mouvement'])
         ordering = self.request.query_params.get('ordering')
         if ordering:
@@ -657,7 +667,7 @@ def quick_order(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def deliver_order(request):
-    """Deliver an order and deduct stock"""
+    """Deliver an order and deduct stock, transfer to service's assigned magasin"""
     commande_id = request.data.get('commande_id')
     
     if not commande_id:
@@ -670,6 +680,14 @@ def deliver_order(request):
     
     if commande.statut != 'EN_COURS':
         return Response({'error': 'La commande doit être en cours pour être livrée'}, status=400)
+    
+    # Get service's assigned magasin
+    service_magasin = None
+    if hasattr(commande.service, 'magasin') and commande.service.magasin:
+        service_magasin = commande.service.magasin
+    
+    if not service_magasin:
+        return Response({'error': 'Aucun magasin assigné au service'}, status=400)
     
     today = timezone.now().strftime('%Y%m%d')
     last_mouvement = MouvementStock.objects.filter(
@@ -686,6 +704,7 @@ def deliver_order(request):
         if quantite_a_livrer <= 0:
             continue
         
+        # Get lots from the main pharmacy (no specific magasin or default)
         lots = LotProduit.objects.filter(
             produit=ligne.produit,
             quantite_actuelle__gt=0,
@@ -700,18 +719,40 @@ def deliver_order(request):
             available = lot.quantite_actuelle
             deduct = min(available, remaining)
             
+            # Deduct from source
             lot.quantite_actuelle -= deduct
             lot.save()
             
             last_num += 1
             numero_mouvement = f"MVT-{today}-{last_num:05d}"
             
+            # Create or get lot in service's magasin
+            service_lot, created = LotProduit.objects.get_or_create(
+                produit=ligne.produit,
+                numero_lot=lot.numero_lot,
+                magasin=service_magasin,
+                defaults={
+                    'quantite_initiale': 0,
+                    'quantite_actuelle': 0,
+                    'date_fabrication': lot.date_fabrication,
+                    'date_peremption': lot.date_peremption,
+                    'date_reception': lot.date_reception,
+                    'statut': 'DISPONIBLE'
+                }
+            )
+            
+            # Add to service's lot
+            service_lot.quantite_actuelle += deduct
+            service_lot.save()
+            
             MouvementStock.objects.create(
                 numero_mouvement=numero_mouvement,
                 produit=ligne.produit,
                 lot=lot,
-                type_mouvement='SORTIE_SERVICE',
+                type_mouvement='TRANSFERT',
                 quantite=deduct,
+                magasin_source=lot.magasin,
+                magasin_destination=service_magasin,
                 date_mouvement=timezone.now()
             )
             
@@ -764,7 +805,7 @@ def deliver_order(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def stock_reception(request):
-    """Receive stock with lots/batches and optional document"""
+    """Receive stock with lots/batches and optional document, assigned to main pharmacy"""
     fournisseur_id = request.data.get('fournisseur_id')
     lignes = request.data.get('lignes', [])
     document = request.data.get('document', None)
@@ -779,6 +820,15 @@ def stock_reception(request):
         fournisseur = Fournisseur.objects.get(id=fournisseur_id)
     except Fournisseur.DoesNotExist:
         return Response({'error': 'Fournisseur not found'}, status=404)
+    
+    # Get the main/default pharmacy magasin (first PRINCIPAL type)
+    main_magasin = Magasin.objects.filter(type_magasin='PRINCIPAL', actif=True).first()
+    if not main_magasin:
+        # Fallback to any active magasin
+        main_magasin = Magasin.objects.filter(actif=True).first()
+    
+    if not main_magasin:
+        return Response({'error': 'Aucun magasin principal configuré'}, status=400)
     
     lots_created = []
     
@@ -799,9 +849,11 @@ def stock_reception(request):
         except Produit.DoesNotExist:
             continue
         
+        # Create lot in main pharmacy with the assigned magasin
         lot, created = LotProduit.objects.get_or_create(
             produit=produit,
             numero_lot=numero_lot,
+            magasin=main_magasin,
             defaults={
                 'quantite_initiale': quantite,
                 'quantite_actuelle': quantite,
@@ -837,6 +889,7 @@ def stock_reception(request):
             lot=lot,
             type_mouvement='ENTREE_ACHAT',
             quantite=quantite,
+            magasin_destination=main_magasin,
             date_mouvement=timezone.now()
         )
         
@@ -872,10 +925,22 @@ def stock_reception(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def dashboard_kpis(request):
-    """Get dashboard KPIs"""
+    """Get dashboard KPIs, filtered by user's service's magasin if applicable"""
     from django.db.models import Count, Q, F
     from django.db.models.functions import Coalesce
     from django.db import connection
+    
+    user = request.user
+    
+    # Filter by user's service's magasin if they have one assigned
+    user_magasin = None
+    if hasattr(user, 'service') and user.service and user.service.magasin:
+        user_magasin = user.service.magasin
+    
+    # Base filter for lots in user's magasin
+    lot_filter = Q()
+    if user_magasin:
+        lot_filter = Q(lotproduit__magasin=user_magasin)
     
     today = timezone.now().date()
     thirty_days = today + timezone.timedelta(days=30)
@@ -885,42 +950,60 @@ def dashboard_kpis(request):
         statut='DISPONIBLE',
         prix_unitaire_achat__isnull=False
     )
+    if user_magasin:
+        lots_with_price = lots_with_price.filter(magasin=user_magasin)
     total_stock_value = sum(
         float(lot.quantite_actuelle) * float(lot.prix_unitaire_achat or 0)
         for lot in lots_with_price
     )
     
-    products_with_stock = LotProduit.objects.filter(
+    products_with_stock_query = LotProduit.objects.filter(
         quantite_actuelle__gt=0,
         statut='DISPONIBLE'
-    ).values('produit').distinct().count()
+    )
+    if user_magasin:
+        products_with_stock_query = products_with_stock_query.filter(magasin=user_magasin)
+    products_with_stock = products_with_stock_query.values('produit').distinct().count()
     
     total_products = Produit.objects.filter(actif=True).count()
     ruptures_count = total_products - products_with_stock
     
-    lots_expiring_30 = LotProduit.objects.filter(
+    lots_expiring_30_query = LotProduit.objects.filter(
         date_peremption__lte=thirty_days,
         date_peremption__gte=today,
         quantite_actuelle__gt=0
-    ).count()
+    )
+    if user_magasin:
+        lots_expiring_30_query = lots_expiring_30_query.filter(magasin=user_magasin)
+    lots_expiring_30 = lots_expiring_30_query.count()
     
-    lots_expiring_90 = LotProduit.objects.filter(
+    lots_expiring_90_query = LotProduit.objects.filter(
         date_peremption__lte=ninety_days,
         date_peremption__gte=today,
         quantite_actuelle__gt=0
-    ).count()
+    )
+    if user_magasin:
+        lots_expiring_90_query = lots_expiring_90_query.filter(magasin=user_magasin)
+    lots_expiring_90 = lots_expiring_90_query.count()
     
     low_stock_products = []
-    low_stock_produits = Produit.objects.filter(
-        actif=True
-    ).annotate(
-        stock_total=Sum('lotproduit__quantite_actuelle')
-    ).filter(
-        stock_total__lt=F('stock_securite'),
-        stock_securite__gt=0
-    )[:10]
+    low_stock_query = Produit.objects.filter(actif=True)
+    if user_magasin:
+        low_stock_query = low_stock_query.annotate(
+            stock_total=Sum('lotproduit__quantite_actuelle', filter=Q(lotproduit__magasin=user_magasin))
+        ).filter(
+            stock_total__lt=F('stock_securite'),
+            stock_securite__gt=0
+        )[:10]
+    else:
+        low_stock_query = low_stock_query.annotate(
+            stock_total=Sum('lotproduit__quantite_actuelle')
+        ).filter(
+            stock_total__lt=F('stock_securite'),
+            stock_securite__gt=0
+        )[:10]
     
-    for p in low_stock_produits:
+    for p in low_stock_query:
         low_stock_products.append({
             'id': p.id,
             'denomination': p.denomination,
@@ -929,11 +1012,14 @@ def dashboard_kpis(request):
         })
     
     expiring_lots = []
-    expiring = LotProduit.objects.filter(
+    expiring_query = LotProduit.objects.filter(
         date_peremption__lte=thirty_days,
         date_peremption__gte=today,
         quantite_actuelle__gt=0
-    ).select_related('produit')[:10]
+    ).select_related('produit')
+    if user_magasin:
+        expiring_query = expiring_query.filter(magasin=user_magasin)
+    expiring = expiring_query[:10]
     
     for lot in expiring:
         expiring_lots.append({
@@ -947,7 +1033,10 @@ def dashboard_kpis(request):
     
     pending_orders = CommandeService.objects.filter(
         statut__in=['EN_ATTENTE', 'VALIDEE']
-    ).count()
+    )
+    if user_magasin and hasattr(user, 'service') and user.service:
+        pending_orders = pending_orders.filter(service=user.service)
+    pending_orders = pending_orders.count()
     
     return Response({
         'stock_value': float(total_stock_value),
@@ -965,16 +1054,20 @@ def dashboard_kpis(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def stock_list(request):
-    """Get aggregated stock by product"""
-    from django.db.models import Sum, Count, Q
+    """Get aggregated stock by product, filtered by user's service's magasin using movements"""
+    from django.db.models import Sum, Count, Q, F
     
-    # Get all products with their aggregated stock
-    products = Produit.objects.filter(actif=True).annotate(
-        total_stock=Sum('lotproduit__quantite_actuelle'),
-        lots_count=Count('lotproduit')
-    ).order_by('denomination')
+    user = request.user
     
-    # Apply search filter
+    # Get user's service's assigned magasin
+    user_magasin = None
+    if hasattr(user, 'service') and user.service and hasattr(user.service, 'magasin'):
+        user_magasin = user.service.magasin
+    
+    # Get all products
+    products = Produit.objects.filter(actif=True)
+    
+    # Apply search filter first
     search = request.query_params.get('search')
     if search:
         products = products.filter(
@@ -983,6 +1076,32 @@ def stock_list(request):
             Q(code_interne__icontains=search) |
             Q(dci__icontains=search)
         )
+    
+    # Calculate stock based on movements for user's service's magasin
+    if user_magasin:
+        # Stock = sum of quantities where this magasin is destination - sum where it's source
+        products = products.annotate(
+            total_stock=Sum(
+                'mouvementstock__quantite',
+                filter=Q(mouvementstock__magasin_destination=user_magasin)
+            ) - Sum(
+                'mouvementstock__quantite',
+                filter=Q(mouvementstock__magasin_source=user_magasin)
+            )
+        ).annotate(
+            lots_count=Count('mouvementstock', filter=Q(
+                Q(mouvementstock__magasin_destination=user_magasin) |
+                Q(mouvementstock__magasin_source=user_magasin)
+            ))
+        )
+    else:
+        # Admin sees all stock from lots
+        products = products.annotate(
+            total_stock=Sum('lotproduit__quantite_actuelle'),
+            lots_count=Count('lotproduit')
+        )
+    
+    products = products.order_by('denomination')
     
     # Pagination
     page = int(request.query_params.get('page', 1))
@@ -1062,4 +1181,51 @@ def journal_list(request):
     return Response({
         'count': total,
         'results': data,
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dashboard_magasins_orders(request):
+    """Get orders grouped by service/magasin with status counts and pending orders"""
+    services = Service.objects.filter(actif=True).annotate(
+        total_commandes=Count('commandeservice'),
+        en_attente=Count('commandeservice', filter=Q(commandeservice__statut='EN_ATTENTE')),
+        validee=Count('commandeservice', filter=Q(commandeservice__statut='VALIDEE')),
+        en_cours=Count('commandeservice', filter=Q(commandeservice__statut='EN_COURS')),
+        livree=Count('commandeservice', filter=Q(commandeservice__statut='LIVREE')),
+        annulee=Count('commandeservice', filter=Q(commandeservice__statut='ANNULEE')),
+    ).order_by('nom')
+    
+    results = []
+    for service in services:
+        # Get pending orders for this service
+        pending_orders = CommandeService.objects.filter(
+            service=service,
+            statut__in=['EN_ATTENTE', 'VALIDEE']
+        ).select_related('service')[:5]
+        
+        pending_orders_list = [{
+            'id': order.id,
+            'numero_commande': order.numero_commande,
+            'service_nom': order.service.nom,
+            'statut': order.statut,
+            'date_demande': order.date_demande,
+        } for order in pending_orders]
+        
+        results.append({
+            'service_id': service.id,
+            'service_nom': service.nom,
+            'service_code': service.code_service,
+            'total_commandes': service.total_commandes,
+            'en_attente': service.en_attente,
+            'validee': service.validee,
+            'en_cours': service.en_cours,
+            'livree': service.livree,
+            'annulee': service.annulee,
+            'pending_orders': pending_orders_list,
+        })
+    
+    return Response({
+        'magasins': results,
     })
