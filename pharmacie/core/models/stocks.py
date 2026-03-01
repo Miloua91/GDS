@@ -1,8 +1,12 @@
 from django.db import models
 from .base import BaseModel
 
+
 class LotProduit(BaseModel):
     produit = models.ForeignKey("Produit", on_delete=models.CASCADE)
+    magasin = models.ForeignKey(
+        "Magasin", on_delete=models.CASCADE, null=True, blank=True
+    )
 
     numero_lot = models.CharField(max_length=100)
 
@@ -14,17 +18,14 @@ class LotProduit(BaseModel):
     quantite_actuelle = models.IntegerField()
     quantite_reservee = models.IntegerField(default=0)
 
-    statut = models.CharField(
-        max_length=30,
-        default="DISPONIBLE"
-    )
+    statut = models.CharField(max_length=30, default="DISPONIBLE")
 
     prix_unitaire_achat = models.DecimalField(
         max_digits=15, decimal_places=2, blank=True, null=True
     )
 
     class Meta:
-        unique_together = ("produit", "numero_lot")
+        unique_together = ("produit", "numero_lot", "magasin")
 
     def __str__(self):
         return f"{self.produit} - Lot {self.numero_lot}"

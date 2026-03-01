@@ -1,12 +1,15 @@
 from django.db import models
 from .base import BaseModel
 
+
 class Magasin(BaseModel):
     code_magasin = models.CharField(max_length=50, unique=True)
     nom = models.CharField(max_length=200)
 
     TYPE_CHOICES = [
         ("PRINCIPAL", "Principal"),
+        ("HORS_CIRCLE", "Hors Circuit (Urgence Grave)"),
+        ("URGENCE", "Urgence"),
         ("PSYCHOTROPES", "Psychotropes"),
         ("CHAINE_FROID", "Chaine froid"),
         ("CONSOMMABLES", "Consommables"),
