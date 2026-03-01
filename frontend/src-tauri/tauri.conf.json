@@ -30,7 +30,12 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
-    "icon": ["icons/logo.ico"]
+    "targets": ["msi"],
+    "icon": ["icons/logo.ico"],
+    "windows": {
+      "wix": {
+        "language": ["fr-FR", "en-US"]
+      }
+    }
   }
 }
