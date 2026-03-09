@@ -637,7 +637,8 @@ def produits_with_stock(request):
     Shows stock from Pharmacie Centrale (PRINCIPAL) for ordering purposes.
     """
     from django.db import models
-    from django.db.models import Sum, Q
+    from django.db.models import Sum, Q, F
+    from django.db.models.functions import Coalesce
 
     # Get Pharmacie Centrale for ordering stock
     principal_magasin = Magasin.objects.filter(
@@ -651,13 +652,25 @@ def produits_with_stock(request):
     queryset = (
         Produit.objects.filter(actif=True)
         .annotate(
-            stock_total=Sum(
+            lot_stock=Sum(
                 "lotproduit__quantite_actuelle",
                 filter=Q(
                     lotproduit__magasin=principal_magasin,
                     lotproduit__statut="DISPONIBLE",
                 ),
             )
+        )
+        .annotate(
+            lot_reserved=Sum(
+                "lotproduit__quantite_reservee",
+                filter=Q(
+                    lotproduit__magasin=principal_magasin,
+                    lotproduit__statut="DISPONIBLE",
+                ),
+            )
+        )
+        .annotate(
+            stock_total=F("lot_stock") - Coalesce(F("lot_reserved"), 0)
         )
         .order_by("denomination")
     )
@@ -1271,45 +1284,54 @@ def stock_list(request):
             | Q(dci__icontains=search)
         )
 
-    # Calculate stock based on lots AND movements for user's service's magasin
+    # Calculate stock based on lots only (movements already update lot.quantite_actuelle)
     if user_magasin:
-        # Stock = lots in this magasin + (movements in - movements out)
+        # Stock = sum of lot quantities minus reserved (only DISPONIBLE lots)
         products = (
             products.annotate(
                 lot_stock=Sum(
                     "lotproduit__quantite_actuelle",
-                    filter=Q(lotproduit__magasin=user_magasin),
+                    filter=Q(
+                        lotproduit__magasin=user_magasin,
+                        lotproduit__statut="DISPONIBLE",
+                    ),
                 )
             )
             .annotate(
-                mouvement_in=Sum(
-                    "mouvementstock__quantite",
-                    filter=Q(mouvementstock__magasin_destination=user_magasin),
+                lot_reserved=Sum(
+                    "lotproduit__quantite_reservee",
+                    filter=Q(
+                        lotproduit__magasin=user_magasin,
+                        lotproduit__statut="DISPONIBLE",
+                    ),
                 )
             )
             .annotate(
-                mouvement_out=Sum(
-                    "mouvementstock__quantite",
-                    filter=Q(mouvementstock__magasin_source=user_magasin),
-                )
-            )
-            .annotate(
-                total_stock=F("lot_stock")
-                + Coalesce(F("mouvement_in"), 0)
-                - Coalesce(F("mouvement_out"), 0)
+                total_stock=F("lot_stock") - Coalesce(F("lot_reserved"), 0)
             )
             .annotate(
                 lots_count=Count(
                     "lotproduit",
-                    filter=Q(lotproduit__magasin=user_magasin),
+                    filter=Q(
+                        lotproduit__magasin=user_magasin,
+                        lotproduit__statut="DISPONIBLE",
+                    ),
                 )
             )
         )
     else:
-        # Admin sees all stock from lots
+        # Admin sees all stock from lots (only DISPONIBLE)
         products = products.annotate(
-            total_stock=Sum("lotproduit__quantite_actuelle"),
-            lots_count=Count("lotproduit"),
+            lot_stock=Sum(
+                "lotproduit__quantite_actuelle",
+                filter=Q(lotproduit__statut="DISPONIBLE"),
+            ),
+            lot_reserved=Sum(
+                "lotproduit__quantite_reservee",
+                filter=Q(lotproduit__statut="DISPONIBLE"),
+            ),
+            total_stock=F("lot_stock") - Coalesce(F("lot_reserved"), 0),
+            lots_count=Count("lotproduit", filter=Q(lotproduit__statut="DISPONIBLE")),
         )
 
     products = products.order_by("denomination")
